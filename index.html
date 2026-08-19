@@ -1,0 +1,1131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Moonvera — Real Estate</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --navy: #0d1b2a;
+      --gold: #c9a84c;
+      --gold-light: #e8c97e;
+      --cream: #f9f5ee;
+      --white: #ffffff;
+      --gray: #6b7280;
+      --light-gray: #f3f4f6;
+      --border: #e5e7eb;
+      --radius: 12px;
+      --shadow: 0 4px 24px rgba(13,27,42,.10);
+      --shadow-lg: 0 12px 48px rgba(13,27,42,.18);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      color: var(--navy);
+      background: var(--white);
+      overflow-x: hidden;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 6vw;
+      height: 72px;
+      background: rgba(255,255,255,.92);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(201,168,76,.15);
+      transition: box-shadow .3s;
+    }
+    nav.scrolled { box-shadow: var(--shadow); }
+
+    .nav-logo {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: var(--navy);
+      letter-spacing: -0.5px;
+      text-decoration: none;
+    }
+    .nav-logo span { color: var(--gold); }
+
+    .nav-links {
+      display: flex; align-items: center; gap: 2.5rem;
+      list-style: none;
+    }
+    .nav-links a {
+      text-decoration: none;
+      font-size: .9rem;
+      font-weight: 500;
+      color: var(--navy);
+      transition: color .2s;
+    }
+    .nav-links a:hover { color: var(--gold); }
+
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center;
+      padding: .7rem 1.6rem;
+      border-radius: 8px;
+      font-family: 'Inter', sans-serif;
+      font-weight: 600;
+      font-size: .875rem;
+      text-decoration: none;
+      cursor: pointer;
+      transition: all .2s;
+      border: none;
+    }
+    .btn-gold {
+      background: var(--gold);
+      color: var(--white);
+    }
+    .btn-gold:hover { background: #b8943e; transform: translateY(-1px); box-shadow: 0 4px 14px rgba(201,168,76,.35); }
+    .btn-outline {
+      background: transparent;
+      color: var(--navy);
+      border: 1.5px solid var(--navy);
+    }
+    .btn-outline:hover { background: var(--navy); color: var(--white); }
+
+    .hamburger { display: none; flex-direction: column; gap: 5px; cursor: pointer; padding: 4px; }
+    .hamburger span { display: block; width: 24px; height: 2px; background: var(--navy); border-radius: 2px; transition: all .3s; }
+
+    /* ── HERO ── */
+    .hero {
+      min-height: 100vh;
+      display: flex; align-items: center;
+      background: linear-gradient(135deg, #0d1b2a 0%, #1a3352 60%, #213d5e 100%);
+      position: relative;
+      overflow: hidden;
+      padding: 120px 6vw 80px;
+    }
+    .hero::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23c9a84c' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    }
+
+    .hero-content { position: relative; z-index: 1; max-width: 650px; }
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: .5rem;
+      background: rgba(201,168,76,.15);
+      border: 1px solid rgba(201,168,76,.3);
+      color: var(--gold-light);
+      padding: .4rem 1rem;
+      border-radius: 100px;
+      font-size: .8rem;
+      font-weight: 500;
+      letter-spacing: .5px;
+      text-transform: uppercase;
+      margin-bottom: 1.5rem;
+    }
+    .hero h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(2.4rem, 5vw, 4rem);
+      font-weight: 700;
+      color: var(--white);
+      line-height: 1.15;
+      margin-bottom: 1.25rem;
+    }
+    .hero h1 em { color: var(--gold); font-style: normal; }
+    .hero p {
+      font-size: 1.05rem;
+      color: rgba(255,255,255,.72);
+      line-height: 1.75;
+      max-width: 520px;
+      margin-bottom: 2.25rem;
+    }
+    .hero-cta { display: flex; gap: 1rem; flex-wrap: wrap; }
+
+    .hero-stats {
+      display: flex; gap: 2.5rem; margin-top: 3.5rem; flex-wrap: wrap;
+    }
+    .stat { border-left: 2px solid var(--gold); padding-left: 1rem; }
+    .stat-num {
+      font-family: 'Playfair Display', serif;
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--white);
+      line-height: 1;
+    }
+    .stat-label { font-size: .8rem; color: rgba(255,255,255,.55); margin-top: .2rem; }
+
+    .hero-image-wrap {
+      position: absolute; right: 0; top: 0; bottom: 0; width: 45%;
+      overflow: hidden; z-index: 0;
+    }
+    .hero-image-wrap::before {
+      content: '';
+      position: absolute; left: 0; top: 0; bottom: 0; width: 200px; z-index: 1;
+      background: linear-gradient(to right, #0d1b2a, transparent);
+    }
+    .hero-image-wrap img {
+      width: 100%; height: 100%; object-fit: cover; opacity: .35;
+    }
+    .hero-image-placeholder {
+      width: 100%; height: 100%;
+      background: linear-gradient(160deg, #1e3a5f, #0d1b2a);
+      display: flex; align-items: center; justify-content: center;
+      opacity: .6;
+    }
+    .hero-image-placeholder svg { width: 260px; opacity: .25; }
+
+    /* ── SEARCH BAR ── */
+    .search-section {
+      background: var(--cream);
+      padding: 0 6vw;
+    }
+    .search-card {
+      background: var(--white);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-lg);
+      padding: 2rem 2.5rem;
+      margin-top: -2.5rem;
+      position: relative; z-index: 10;
+    }
+    .search-tabs { display: flex; gap: 0; margin-bottom: 1.5rem; border-bottom: 2px solid var(--border); }
+    .search-tab {
+      padding: .6rem 1.5rem;
+      font-size: .875rem;
+      font-weight: 600;
+      color: var(--gray);
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -2px;
+      transition: all .2s;
+      user-select: none;
+    }
+    .search-tab.active { color: var(--navy); border-bottom-color: var(--gold); }
+    .search-fields {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr auto;
+      gap: 1rem; align-items: end;
+    }
+    .field label { display: block; font-size: .78rem; font-weight: 600; color: var(--gray); text-transform: uppercase; letter-spacing: .5px; margin-bottom: .4rem; }
+    .field select, .field input {
+      width: 100%; padding: .75rem 1rem;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      font-family: 'Inter', sans-serif;
+      font-size: .9rem;
+      color: var(--navy);
+      background: var(--white);
+      appearance: none;
+      outline: none;
+      transition: border-color .2s;
+    }
+    .field select:focus, .field input:focus { border-color: var(--gold); }
+
+    /* ── SECTION COMMONS ── */
+    section { padding: 100px 6vw; }
+    .section-label {
+      font-size: .78rem; font-weight: 600; letter-spacing: 2px; text-transform: uppercase;
+      color: var(--gold); margin-bottom: .75rem;
+    }
+    .section-title {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(1.8rem, 3vw, 2.8rem);
+      font-weight: 700; line-height: 1.2;
+      color: var(--navy);
+    }
+    .section-title em { color: var(--gold); font-style: normal; }
+    .section-sub { font-size: 1rem; color: var(--gray); line-height: 1.7; max-width: 520px; margin-top: .75rem; }
+
+    .section-head { display: flex; justify-content: space-between; align-items: flex-end; gap: 2rem; flex-wrap: wrap; margin-bottom: 3rem; }
+
+    /* ── FEATURED PROPERTIES ── */
+    .properties-bg { background: var(--cream); }
+
+    .properties-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 2rem;
+    }
+    .property-card {
+      background: var(--white);
+      border-radius: var(--radius);
+      overflow: hidden;
+      box-shadow: var(--shadow);
+      transition: transform .25s, box-shadow .25s;
+      cursor: pointer;
+    }
+    .property-card:hover { transform: translateY(-6px); box-shadow: var(--shadow-lg); }
+
+    .property-img {
+      position: relative; height: 230px; overflow: hidden;
+    }
+    .property-img .badge {
+      position: absolute; top: 1rem; left: 1rem;
+      background: var(--gold); color: var(--white);
+      font-size: .72rem; font-weight: 700; letter-spacing: .5px; text-transform: uppercase;
+      padding: .25rem .75rem; border-radius: 100px;
+    }
+    .property-img .badge.rent { background: var(--navy); }
+    .property-img .save-btn {
+      position: absolute; top: 1rem; right: 1rem;
+      width: 36px; height: 36px; border-radius: 50%;
+      background: rgba(255,255,255,.9);
+      border: none; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem; transition: background .2s;
+    }
+    .property-img .save-btn:hover { background: var(--white); }
+    .property-img .save-btn.saved { color: #e74c3c; }
+
+    .prop-visual {
+      width: 100%; height: 100%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 4rem;
+    }
+
+    .property-body { padding: 1.5rem; }
+    .property-price {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.45rem; font-weight: 700;
+      color: var(--navy); margin-bottom: .25rem;
+    }
+    .property-price span { font-size: .85rem; font-family: 'Inter', sans-serif; font-weight: 400; color: var(--gray); }
+    .property-name { font-size: 1rem; font-weight: 600; margin-bottom: .25rem; }
+    .property-loc { font-size: .875rem; color: var(--gray); display: flex; align-items: center; gap: .3rem; margin-bottom: 1.1rem; }
+    .property-features {
+      display: flex; gap: 1.25rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--border);
+    }
+    .feat { font-size: .8rem; color: var(--gray); display: flex; align-items: center; gap: .35rem; }
+    .feat strong { color: var(--navy); font-weight: 600; }
+
+    /* ── SERVICES ── */
+    .services-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 2rem;
+    }
+    .service-card {
+      padding: 2rem;
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius);
+      transition: all .25s;
+    }
+    .service-card:hover {
+      border-color: var(--gold);
+      box-shadow: 0 8px 32px rgba(201,168,76,.12);
+      transform: translateY(-4px);
+    }
+    .service-icon {
+      width: 52px; height: 52px; border-radius: 12px;
+      background: linear-gradient(135deg, rgba(201,168,76,.15), rgba(201,168,76,.05));
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.5rem; margin-bottom: 1.25rem;
+    }
+    .service-card h3 { font-size: 1.05rem; font-weight: 600; margin-bottom: .6rem; }
+    .service-card p { font-size: .875rem; color: var(--gray); line-height: 1.65; }
+
+    /* ── WHY US ── */
+    .why-bg { background: var(--navy); }
+    .why-inner {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 5rem; align-items: center;
+    }
+    .why-content .section-label { color: var(--gold-light); }
+    .why-content .section-title { color: var(--white); }
+    .why-content .section-sub { color: rgba(255,255,255,.6); }
+    .why-list { margin-top: 2rem; display: flex; flex-direction: column; gap: 1.25rem; }
+    .why-item { display: flex; gap: 1rem; align-items: flex-start; }
+    .why-check {
+      width: 28px; height: 28px; border-radius: 50%;
+      background: var(--gold); color: var(--white);
+      display: flex; align-items: center; justify-content: center;
+      font-size: .85rem; flex-shrink: 0; margin-top: 2px;
+    }
+    .why-item-text h4 { font-size: .95rem; font-weight: 600; color: var(--white); margin-bottom: .25rem; }
+    .why-item-text p { font-size: .85rem; color: rgba(255,255,255,.55); line-height: 1.6; }
+
+    .why-visual {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem;
+    }
+    .why-box {
+      background: rgba(255,255,255,.07);
+      border: 1px solid rgba(255,255,255,.1);
+      border-radius: var(--radius);
+      padding: 1.75rem 1.5rem;
+      text-align: center;
+    }
+    .why-box-num {
+      font-family: 'Playfair Display', serif;
+      font-size: 2.4rem; font-weight: 700;
+      color: var(--gold); line-height: 1;
+    }
+    .why-box-label { font-size: .8rem; color: rgba(255,255,255,.55); margin-top: .4rem; }
+
+    /* ── TESTIMONIALS ── */
+    .testimonials-bg { background: var(--cream); }
+    .testimonials-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 2rem;
+    }
+    .testimonial-card {
+      background: var(--white);
+      border-radius: var(--radius);
+      padding: 2rem;
+      box-shadow: var(--shadow);
+    }
+    .stars { color: var(--gold); font-size: 1rem; margin-bottom: 1rem; letter-spacing: 2px; }
+    .testimonial-card p { font-size: .9rem; color: var(--gray); line-height: 1.75; font-style: italic; margin-bottom: 1.5rem; }
+    .reviewer { display: flex; align-items: center; gap: .85rem; }
+    .reviewer-avatar {
+      width: 44px; height: 44px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--gold), var(--navy));
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700; font-size: 1rem; color: var(--white);
+    }
+    .reviewer-name { font-weight: 600; font-size: .9rem; }
+    .reviewer-role { font-size: .78rem; color: var(--gray); }
+
+    /* ── AGENTS ── */
+    .agents-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 2rem;
+    }
+    .agent-card {
+      text-align: center; padding: 2rem 1.5rem;
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius);
+      transition: all .25s;
+    }
+    .agent-card:hover { border-color: var(--gold); box-shadow: var(--shadow); transform: translateY(-4px); }
+    .agent-avatar {
+      width: 80px; height: 80px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--gold), var(--navy));
+      display: flex; align-items: center; justify-content: center;
+      font-size: 2rem; margin: 0 auto 1rem;
+    }
+    .agent-name { font-weight: 600; font-size: 1rem; margin-bottom: .2rem; }
+    .agent-title { font-size: .8rem; color: var(--gold); font-weight: 500; margin-bottom: .6rem; }
+    .agent-deals { font-size: .78rem; color: var(--gray); margin-bottom: 1rem; }
+    .agent-links { display: flex; justify-content: center; gap: .75rem; }
+    .agent-links a {
+      width: 34px; height: 34px; border-radius: 50%;
+      border: 1.5px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      font-size: .9rem; text-decoration: none; color: var(--navy);
+      transition: all .2s;
+    }
+    .agent-links a:hover { border-color: var(--gold); color: var(--gold); }
+
+    /* ── CONTACT ── */
+    .contact-bg { background: var(--navy); }
+    .contact-inner {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 5rem; align-items: start;
+    }
+    .contact-info .section-label { color: var(--gold-light); }
+    .contact-info .section-title { color: var(--white); }
+    .contact-info .section-sub { color: rgba(255,255,255,.6); }
+    .contact-details { margin-top: 2.5rem; display: flex; flex-direction: column; gap: 1.5rem; }
+    .contact-detail { display: flex; gap: 1rem; align-items: flex-start; }
+    .contact-detail-icon {
+      width: 44px; height: 44px; border-radius: 10px;
+      background: rgba(201,168,76,.15);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.15rem; flex-shrink: 0;
+    }
+    .contact-detail-text h4 { font-size: .85rem; font-weight: 600; color: rgba(255,255,255,.55); text-transform: uppercase; letter-spacing: .5px; margin-bottom: .2rem; }
+    .contact-detail-text p { font-size: .95rem; color: var(--white); }
+
+    .contact-form {
+      background: var(--white);
+      border-radius: var(--radius);
+      padding: 2.5rem;
+    }
+    .contact-form h3 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.4rem; margin-bottom: 1.5rem;
+    }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    .form-group { display: flex; flex-direction: column; gap: .4rem; margin-bottom: 1.1rem; }
+    .form-group label { font-size: .78rem; font-weight: 600; color: var(--gray); text-transform: uppercase; letter-spacing: .5px; }
+    .form-group input, .form-group select, .form-group textarea {
+      padding: .75rem 1rem;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      font-family: 'Inter', sans-serif; font-size: .9rem;
+      color: var(--navy); background: var(--white);
+      outline: none; transition: border-color .2s;
+      resize: vertical;
+    }
+    .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: var(--gold); }
+
+    /* ── FOOTER ── */
+    footer {
+      background: #060e17;
+      color: rgba(255,255,255,.55);
+      padding: 60px 6vw 30px;
+    }
+    .footer-grid {
+      display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 3rem;
+      padding-bottom: 3rem;
+      border-bottom: 1px solid rgba(255,255,255,.08);
+      margin-bottom: 2rem;
+    }
+    .footer-brand .nav-logo { display: block; margin-bottom: 1rem; }
+    .footer-brand p { font-size: .875rem; line-height: 1.7; max-width: 280px; }
+    .footer-col h4 { font-size: .85rem; font-weight: 600; color: var(--white); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 1.25rem; }
+    .footer-col ul { list-style: none; display: flex; flex-direction: column; gap: .7rem; }
+    .footer-col ul a { text-decoration: none; color: rgba(255,255,255,.55); font-size: .875rem; transition: color .2s; }
+    .footer-col ul a:hover { color: var(--gold); }
+    .footer-bottom { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; font-size: .8rem; }
+    .footer-bottom a { color: var(--gold); text-decoration: none; }
+
+    /* ── TABLET (≤ 1024px) ── */
+    @media (max-width: 1024px) {
+      .why-inner { gap: 3rem; }
+      .contact-inner { gap: 3rem; }
+      .footer-grid { grid-template-columns: 2fr 1fr 1fr; gap: 2rem; }
+    }
+
+    /* ── SMALL TABLET (≤ 900px) ── */
+    @media (max-width: 900px) {
+      .hero-image-wrap { display: none; }
+      .why-inner, .contact-inner { grid-template-columns: 1fr; gap: 2.5rem; }
+      .footer-grid { grid-template-columns: 1fr 1fr; gap: 2rem; }
+      section { padding: 72px 5vw; }
+      .search-card { padding: 1.75rem 1.5rem; }
+      .search-fields { grid-template-columns: 1fr 1fr; gap: .85rem; }
+      .search-fields > button { grid-column: 1 / -1; width: 100%; }
+      .properties-grid { grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
+    }
+
+    /* ── MOBILE (≤ 768px) ── */
+    @media (max-width: 768px) {
+      /* Nav */
+      .nav-links {
+        display: none; flex-direction: column;
+        position: absolute; top: 72px; left: 0; right: 0;
+        background: var(--white);
+        padding: 1.25rem 6vw 1.75rem;
+        border-bottom: 1px solid var(--border);
+        gap: 0;
+        box-shadow: 0 8px 24px rgba(13,27,42,.12);
+      }
+      .nav-links.open { display: flex; }
+      .nav-links li { border-bottom: 1px solid var(--border); }
+      .nav-links li:last-child { border-bottom: none; padding-top: 1rem; }
+      .nav-links a { display: block; padding: .85rem 0; font-size: 1rem; }
+      .hamburger { display: flex; }
+      .hamburger.open span:nth-child(1) { transform: rotate(45deg) translate(5px, 5px); }
+      .hamburger.open span:nth-child(2) { opacity: 0; }
+      .hamburger.open span:nth-child(3) { transform: rotate(-45deg) translate(5px, -5px); }
+
+      /* Hero */
+      .hero { padding: 100px 5vw 60px; min-height: auto; }
+      .hero h1 { font-size: clamp(2rem, 8vw, 2.8rem); }
+      .hero p { font-size: .95rem; }
+      .hero-cta { flex-direction: column; gap: .75rem; }
+      .hero-cta .btn { width: 100%; justify-content: center; padding: .9rem 1.5rem; }
+      .hero-stats { gap: 1.25rem; margin-top: 2.5rem; flex-wrap: wrap; }
+      .stat-num { font-size: 1.6rem; }
+
+      /* Search */
+      .search-section { padding: 0 4vw; }
+      .search-card { padding: 1.25rem 1rem; margin-top: -1.5rem; border-radius: 10px; }
+      .search-tabs { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+      .search-tab { white-space: nowrap; padding: .55rem 1.1rem; font-size: .8rem; }
+      .search-fields { grid-template-columns: 1fr; gap: .75rem; }
+      .search-fields > button { width: 100%; }
+
+      /* Sections */
+      section { padding: 60px 5vw; }
+      .section-head { flex-direction: column; align-items: flex-start; gap: 1rem; margin-bottom: 2rem; }
+      .section-title { font-size: clamp(1.6rem, 6vw, 2.2rem); }
+
+      /* Properties */
+      .properties-grid { grid-template-columns: 1fr; gap: 1.25rem; }
+      .property-card:hover { transform: none; }
+      .property-img { height: 200px; }
+
+      /* Services */
+      .services-grid { grid-template-columns: 1fr; gap: 1rem; }
+      .service-card { padding: 1.5rem; }
+
+      /* Why */
+      .why-visual { grid-template-columns: 1fr 1fr; gap: 1rem; }
+      .why-box { padding: 1.25rem 1rem; }
+      .why-box-num { font-size: 1.8rem; }
+
+      /* Testimonials */
+      .testimonials-grid { grid-template-columns: 1fr; gap: 1.25rem; }
+
+      /* Agents */
+      .agents-grid { grid-template-columns: 1fr 1fr; gap: 1rem; }
+      .agent-card { padding: 1.5rem 1rem; }
+      .agent-avatar { width: 64px; height: 64px; font-size: 1.75rem; }
+
+      /* Contact */
+      .contact-form { padding: 1.75rem 1.25rem; }
+      .form-row { grid-template-columns: 1fr; }
+      .contact-details { gap: 1.1rem; }
+
+      /* Footer */
+      .footer-grid { grid-template-columns: 1fr; gap: 2rem; }
+      .footer-bottom { flex-direction: column; align-items: flex-start; gap: .5rem; }
+
+      /* Touch targets */
+      .btn { min-height: 48px; }
+      .field select, .field input,
+      .form-group input, .form-group select, .form-group textarea { min-height: 48px; font-size: 16px; }
+    }
+
+    /* ── SMALL PHONES (≤ 420px) ── */
+    @media (max-width: 420px) {
+      nav { padding: 0 4vw; }
+      .nav-logo { font-size: 1.35rem; }
+      .hero { padding: 90px 4vw 50px; }
+      section { padding: 52px 4vw; }
+      .agents-grid { grid-template-columns: 1fr; }
+      .why-visual { grid-template-columns: 1fr 1fr; }
+    }
+
+    /* ── SCROLL ANIMATIONS ── */
+    .fade-up { opacity: 0; transform: translateY(30px); transition: opacity .6s, transform .6s; }
+    .fade-up.visible { opacity: 1; transform: translateY(0); }
+  </style>
+</head>
+<body>
+
+<!-- ══ NAV ══ -->
+<nav id="navbar">
+  <a href="#" class="nav-logo">Moon<span>vera</span></a>
+  <ul class="nav-links" id="navLinks">
+    <li><a href="#properties">Properties</a></li>
+    <li><a href="#services">Services</a></li>
+    <li><a href="#why">About</a></li>
+    <li><a href="#agents">Our Agents</a></li>
+    <li><a href="#contact">Contact</a></li>
+    <li><a href="#contact" class="btn btn-gold">Get Started</a></li>
+  </ul>
+  <div class="hamburger" id="hamburger" aria-label="Menu">
+    <span></span><span></span><span></span>
+  </div>
+</nav>
+
+<!-- ══ HERO ══ -->
+<section class="hero" id="home">
+  <div class="hero-content">
+    <div class="hero-badge">✦ Luxury Real Estate</div>
+    <h1>Find Your<br><em>Dream Home</em><br>With Moonvera</h1>
+    <p>We connect discerning buyers and sellers with exceptional properties. From elegant urban residences to expansive estates — your next chapter starts here.</p>
+    <div class="hero-cta">
+      <a href="#properties" class="btn btn-gold">Explore Properties</a>
+      <a href="#contact" class="btn" style="background:rgba(255,255,255,.1);color:#fff;border:1.5px solid rgba(255,255,255,.25);">Talk to an Agent</a>
+    </div>
+    <div class="hero-stats">
+      <div class="stat"><div class="stat-num">1,200+</div><div class="stat-label">Properties Sold</div></div>
+      <div class="stat"><div class="stat-num">98%</div><div class="stat-label">Client Satisfaction</div></div>
+      <div class="stat"><div class="stat-num">15</div><div class="stat-label">Years of Excellence</div></div>
+    </div>
+  </div>
+  <div class="hero-image-wrap">
+    <div class="hero-image-placeholder">
+      <svg viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="20" y="90" width="70" height="80" fill="#c9a84c" rx="4"/>
+        <rect x="110" y="60" width="70" height="110" fill="#c9a84c" rx="4" opacity=".7"/>
+        <rect x="30" y="110" width="20" height="30" fill="#0d1b2a"/>
+        <rect x="60" y="105" width="20" height="35" fill="#0d1b2a"/>
+        <rect x="120" y="85" width="20" height="30" fill="#0d1b2a"/>
+        <rect x="150" y="80" width="20" height="35" fill="#0d1b2a"/>
+        <rect x="0" y="170" width="200" height="30" fill="#c9a84c" opacity=".15"/>
+        <polygon points="55,90 0,90 55,20" fill="#c9a84c" opacity=".5"/>
+        <polygon points="145,60 95,60 145,0" fill="#c9a84c" opacity=".4"/>
+      </svg>
+    </div>
+  </div>
+</section>
+
+<!-- ══ SEARCH ══ -->
+<div class="search-section" style="padding-top:0;">
+  <div class="search-card fade-up">
+    <div class="search-tabs">
+      <div class="search-tab active" data-tab="buy">Buy</div>
+      <div class="search-tab" data-tab="rent">Rent</div>
+      <div class="search-tab" data-tab="commercial">Commercial</div>
+    </div>
+    <div class="search-fields">
+      <div class="field">
+        <label>Location</label>
+        <select>
+          <option>All Locations</option>
+          <option>Manhattan, NY</option>
+          <option>Beverly Hills, CA</option>
+          <option>Miami Beach, FL</option>
+          <option>Chicago, IL</option>
+          <option>Austin, TX</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Property Type</label>
+        <select>
+          <option>All Types</option>
+          <option>Apartment</option>
+          <option>Villa</option>
+          <option>Penthouse</option>
+          <option>Townhouse</option>
+          <option>Estate</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Price Range</label>
+        <select>
+          <option>Any Price</option>
+          <option>Up to $500K</option>
+          <option>$500K – $1M</option>
+          <option>$1M – $3M</option>
+          <option>$3M – $5M</option>
+          <option>$5M+</option>
+        </select>
+      </div>
+      <button class="btn btn-gold" style="padding:.77rem 2rem;white-space:nowrap;" onclick="handleSearch()">
+        🔍 Search
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ FEATURED PROPERTIES ══ -->
+<section class="properties-bg" id="properties">
+  <div class="section-head fade-up">
+    <div>
+      <div class="section-label">Featured Listings</div>
+      <h2 class="section-title">Exceptional <em>Properties</em></h2>
+      <p class="section-sub">Hand-picked luxury homes and premium investment opportunities in the world's most sought-after locations.</p>
+    </div>
+    <a href="#" class="btn btn-outline">View All</a>
+  </div>
+  <div class="properties-grid" id="propertiesGrid"></div>
+</section>
+
+<!-- ══ SERVICES ══ -->
+<section id="services">
+  <div class="section-head fade-up">
+    <div>
+      <div class="section-label">What We Offer</div>
+      <h2 class="section-title">Full-Service <em>Real Estate</em></h2>
+      <p class="section-sub">From initial search to closing day, Moonvera's experts guide you every step of the way.</p>
+    </div>
+  </div>
+  <div class="services-grid">
+    <div class="service-card fade-up">
+      <div class="service-icon">🏡</div>
+      <h3>Property Sales</h3>
+      <p>Expert guidance for buyers and sellers. We market your property to qualified buyers and negotiate the best possible terms.</p>
+    </div>
+    <div class="service-card fade-up">
+      <div class="service-icon">🔑</div>
+      <h3>Rentals & Leasing</h3>
+      <p>Long-term and short-term rental placements. We match tenants to properties with meticulous screening and care.</p>
+    </div>
+    <div class="service-card fade-up">
+      <div class="service-icon">📊</div>
+      <h3>Investment Advisory</h3>
+      <p>Data-driven market analysis and portfolio strategy to maximize your real estate investment returns.</p>
+    </div>
+    <div class="service-card fade-up">
+      <div class="service-icon">🏢</div>
+      <h3>Commercial Real Estate</h3>
+      <p>Office, retail, and industrial properties. We understand business needs and find spaces that drive growth.</p>
+    </div>
+    <div class="service-card fade-up">
+      <div class="service-icon">🛠️</div>
+      <h3>Property Management</h3>
+      <p>Hands-off ownership experience. From maintenance to rent collection, we manage it all so you don't have to.</p>
+    </div>
+    <div class="service-card fade-up">
+      <div class="service-icon">⚖️</div>
+      <h3>Legal & Closing Support</h3>
+      <p>Seamless transaction closing with our network of trusted attorneys, inspectors, and title professionals.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ══ WHY MOONVERA ══ -->
+<section class="why-bg" id="why">
+  <div class="why-inner">
+    <div class="why-content fade-up">
+      <div class="section-label">Why Moonvera</div>
+      <h2 class="section-title" style="color:#fff;">Trusted by Thousands of<br><em>Happy Homeowners</em></h2>
+      <p class="section-sub">For 15 years, Moonvera has set the standard for luxury real estate service — combining deep market knowledge with white-glove client care.</p>
+      <div class="why-list">
+        <div class="why-item">
+          <div class="why-check">✓</div>
+          <div class="why-item-text">
+            <h4>Exclusive Market Access</h4>
+            <p>Off-market listings and pre-launch properties available only to Moonvera clients.</p>
+          </div>
+        </div>
+        <div class="why-item">
+          <div class="why-check">✓</div>
+          <div class="why-item-text">
+            <h4>Dedicated Personal Agent</h4>
+            <p>One point of contact from search through closing. Your agent knows your goals inside out.</p>
+          </div>
+        </div>
+        <div class="why-item">
+          <div class="why-check">✓</div>
+          <div class="why-item-text">
+            <h4>Data-Backed Valuations</h4>
+            <p>Proprietary market intelligence ensures you buy smart and sell at peak value.</p>
+          </div>
+        </div>
+        <div class="why-item">
+          <div class="why-check">✓</div>
+          <div class="why-item-text">
+            <h4>Transparent Process</h4>
+            <p>No hidden fees, no surprises. Full clarity at every milestone of your transaction.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="why-visual fade-up">
+      <div class="why-box">
+        <div class="why-box-num">$2.4B</div>
+        <div class="why-box-label">Total Sales Volume</div>
+      </div>
+      <div class="why-box">
+        <div class="why-box-num">1,200+</div>
+        <div class="why-box-label">Properties Sold</div>
+      </div>
+      <div class="why-box">
+        <div class="why-box-num">48</div>
+        <div class="why-box-label">Cities Covered</div>
+      </div>
+      <div class="why-box">
+        <div class="why-box-num">15</div>
+        <div class="why-box-label">Years in Business</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ TESTIMONIALS ══ -->
+<section class="testimonials-bg">
+  <div class="section-head fade-up">
+    <div>
+      <div class="section-label">Client Stories</div>
+      <h2 class="section-title">What Our <em>Clients Say</em></h2>
+    </div>
+  </div>
+  <div class="testimonials-grid">
+    <div class="testimonial-card fade-up">
+      <div class="stars">★★★★★</div>
+      <p>"Moonvera found us our dream penthouse in Manhattan in under three weeks. Their off-market access is unmatched, and our agent Jessica was incredible throughout."</p>
+      <div class="reviewer">
+        <div class="reviewer-avatar">DH</div>
+        <div>
+          <div class="reviewer-name">David Harrison</div>
+          <div class="reviewer-role">Buyer — Manhattan, NY</div>
+        </div>
+      </div>
+    </div>
+    <div class="testimonial-card fade-up">
+      <div class="stars">★★★★★</div>
+      <p>"We sold our Beverly Hills estate for 12% above asking price. The marketing strategy Moonvera developed was world-class. We couldn't be happier with the outcome."</p>
+      <div class="reviewer">
+        <div class="reviewer-avatar">SR</div>
+        <div>
+          <div class="reviewer-name">Sofia Rodriguez</div>
+          <div class="reviewer-role">Seller — Beverly Hills, CA</div>
+        </div>
+      </div>
+    </div>
+    <div class="testimonial-card fade-up">
+      <div class="stars">★★★★★</div>
+      <p>"As a first-time investor, I needed guidance. Moonvera's advisory team walked me through every detail and helped me build a portfolio I'm truly proud of."</p>
+      <div class="reviewer">
+        <div class="reviewer-avatar">ML</div>
+        <div>
+          <div class="reviewer-name">Marcus Lee</div>
+          <div class="reviewer-role">Investor — Miami Beach, FL</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ AGENTS ══ -->
+<section id="agents">
+  <div class="section-head fade-up">
+    <div>
+      <div class="section-label">Meet the Team</div>
+      <h2 class="section-title">Our <em>Expert Agents</em></h2>
+      <p class="section-sub">Dedicated professionals with deep local expertise and a passion for finding you the perfect property.</p>
+    </div>
+  </div>
+  <div class="agents-grid" id="agentsGrid"></div>
+</section>
+
+<!-- ══ CONTACT ══ -->
+<section class="contact-bg" id="contact">
+  <div class="contact-inner">
+    <div class="contact-info fade-up">
+      <div class="section-label">Get In Touch</div>
+      <h2 class="section-title" style="color:#fff;">Let's Find Your<br><em>Perfect Property</em></h2>
+      <p class="section-sub">Ready to begin? Our agents are standing by to help you navigate the market and find your ideal home.</p>
+      <div class="contact-details">
+        <div class="contact-detail">
+          <div class="contact-detail-icon">📍</div>
+          <div class="contact-detail-text">
+            <h4>Head Office</h4>
+            <p>350 Fifth Avenue, Suite 4100<br>New York, NY 10118</p>
+          </div>
+        </div>
+        <div class="contact-detail">
+          <div class="contact-detail-icon">📞</div>
+          <div class="contact-detail-text">
+            <h4>Phone</h4>
+            <p>+1 (212) 555-0198</p>
+          </div>
+        </div>
+        <div class="contact-detail">
+          <div class="contact-detail-icon">✉️</div>
+          <div class="contact-detail-text">
+            <h4>Email</h4>
+            <p>hello@moonvera.com</p>
+          </div>
+        </div>
+        <div class="contact-detail">
+          <div class="contact-detail-icon">🕐</div>
+          <div class="contact-detail-text">
+            <h4>Office Hours</h4>
+            <p>Mon – Fri: 9am – 7pm<br>Sat: 10am – 5pm</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="contact-form fade-up">
+      <h3>Send Us a Message</h3>
+      <form onsubmit="handleFormSubmit(event)">
+        <div class="form-row">
+          <div class="form-group">
+            <label>First Name</label>
+            <input type="text" placeholder="John" required />
+          </div>
+          <div class="form-group">
+            <label>Last Name</label>
+            <input type="text" placeholder="Doe" required />
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" placeholder="john@example.com" required />
+        </div>
+        <div class="form-group">
+          <label>Phone</label>
+          <input type="tel" placeholder="+1 (555) 000-0000" />
+        </div>
+        <div class="form-group">
+          <label>I'm interested in</label>
+          <select>
+            <option>Buying a Property</option>
+            <option>Selling a Property</option>
+            <option>Renting a Property</option>
+            <option>Property Management</option>
+            <option>Investment Advisory</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Message</label>
+          <textarea rows="4" placeholder="Tell us about your ideal property..."></textarea>
+        </div>
+        <button type="submit" class="btn btn-gold" style="width:100%;padding:.85rem;">Send Message</button>
+      </form>
+    </div>
+  </div>
+</section>
+
+<!-- ══ FOOTER ══ -->
+<footer>
+  <div class="footer-grid">
+    <div class="footer-brand">
+      <a href="#" class="nav-logo" style="color:#fff;">Moon<span>vera</span></a>
+      <p>Moonvera is a premier luxury real estate firm serving discerning buyers, sellers, and investors across the nation's finest markets.</p>
+    </div>
+    <div class="footer-col">
+      <h4>Properties</h4>
+      <ul>
+        <li><a href="#">Buy</a></li>
+        <li><a href="#">Rent</a></li>
+        <li><a href="#">New Developments</a></li>
+        <li><a href="#">Commercial</a></li>
+        <li><a href="#">Off-Market</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Company</h4>
+      <ul>
+        <li><a href="#">About Us</a></li>
+        <li><a href="#">Our Agents</a></li>
+        <li><a href="#">Careers</a></li>
+        <li><a href="#">Press</a></li>
+        <li><a href="#">Blog</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Support</h4>
+      <ul>
+        <li><a href="#">Contact</a></li>
+        <li><a href="#">FAQ</a></li>
+        <li><a href="#">Privacy Policy</a></li>
+        <li><a href="#">Terms of Service</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>© 2026 Moonvera Real Estate. All rights reserved.</span>
+    <span>Made with ♥ for <a href="#">Moonvera</a></span>
+  </div>
+</footer>
+
+<script>
+  // ── DATA ──
+  const properties = [
+    { id:1, name:'The Meridian Penthouse', location:'Manhattan, NY', price:'$4,250,000', beds:4, baths:3, sqft:'3,800', badge:'For Sale', emoji:'🏙️' },
+    { id:2, name:'Crestwood Villa', location:'Beverly Hills, CA', price:'$7,900,000', beds:6, baths:5, sqft:'7,200', badge:'For Sale', emoji:'🌴' },
+    { id:3, name:'Bayfront Residence', location:'Miami Beach, FL', price:'$12,500/mo', beds:3, baths:2, sqft:'2,100', badge:'For Rent', emoji:'🌊', rent:true },
+    { id:4, name:'Lakeside Estate', location:'Lake Geneva, WI', price:'$2,850,000', beds:5, baths:4, sqft:'5,600', badge:'For Sale', emoji:'🏡' },
+    { id:5, name:'The Loft at River North', location:'Chicago, IL', price:'$4,800/mo', beds:2, baths:2, sqft:'1,450', badge:'For Rent', emoji:'🌆', rent:true },
+    { id:6, name:'Highland Park Manor', location:'Austin, TX', price:'$1,750,000', beds:4, baths:3, sqft:'3,400', badge:'For Sale', emoji:'🌄' },
+  ];
+
+  const agents = [
+    { name:'Jessica Moore', title:'Senior Agent', deals:142, initials:'JM', emoji:'👩' },
+    { name:'Daniel Park', title:'Luxury Specialist', deals:98, initials:'DP', emoji:'👨' },
+    { name:'Amara Williams', title:'Investment Advisor', deals:115, initials:'AW', emoji:'👩' },
+    { name:'Carlos Reyes', title:'Commercial Expert', deals:87, initials:'CR', emoji:'👨' },
+  ];
+
+  // ── RENDER PROPERTIES ──
+  function renderProperties() {
+    const grid = document.getElementById('propertiesGrid');
+    grid.innerHTML = properties.map(p => `
+      <div class="property-card fade-up" onclick="showPropertyDetail(${p.id})">
+        <div class="property-img">
+          <span class="badge${p.rent ? ' rent' : ''}">${p.badge}</span>
+          <button class="save-btn" onclick="toggleSave(event, this)" aria-label="Save property">♡</button>
+          <div class="prop-visual" style="background:${propGradient(p.id)}">${p.emoji}</div>
+        </div>
+        <div class="property-body">
+          <div class="property-price">${p.price}${p.rent ? '<span>/month</span>' : ''}</div>
+          <div class="property-name">${p.name}</div>
+          <div class="property-loc">📍 ${p.location}</div>
+          <div class="property-features">
+            <div class="feat"><strong>${p.beds}</strong> Beds</div>
+            <div class="feat"><strong>${p.baths}</strong> Baths</div>
+            <div class="feat"><strong>${p.sqft}</strong> sqft</div>
+          </div>
+        </div>
+      </div>`).join('');
+    observeFadeUps();
+  }
+
+  function propGradient(id) {
+    const g = ['linear-gradient(135deg,#1a3352,#2d5986)','linear-gradient(135deg,#2d5016,#4a8025)','linear-gradient(135deg,#1a3352,#0d6e8a)','linear-gradient(135deg,#3d1a52,#6b2d8a)','linear-gradient(135deg,#52281a,#8a4a2d)','linear-gradient(135deg,#1a4030,#2d6b50)'];
+    return g[(id-1) % g.length];
+  }
+
+  // ── RENDER AGENTS ──
+  function renderAgents() {
+    const grid = document.getElementById('agentsGrid');
+    grid.innerHTML = agents.map(a => `
+      <div class="agent-card fade-up">
+        <div class="agent-avatar" style="font-size:2.5rem">${a.emoji}</div>
+        <div class="agent-name">${a.name}</div>
+        <div class="agent-title">${a.title}</div>
+        <div class="agent-deals">${a.deals} deals closed</div>
+        <div class="agent-links">
+          <a href="#contact" title="Email">✉</a>
+          <a href="#contact" title="Call">📞</a>
+          <a href="#" title="LinkedIn">in</a>
+        </div>
+      </div>`).join('');
+    observeFadeUps();
+  }
+
+  // ── INTERACTIONS ──
+  function toggleSave(e, btn) {
+    e.stopPropagation();
+    btn.classList.toggle('saved');
+    btn.textContent = btn.classList.contains('saved') ? '♥' : '♡';
+  }
+
+  function showPropertyDetail(id) {
+    const p = properties.find(x => x.id === id);
+    if (!p) return;
+    const msg = `${p.emoji} ${p.name}\n📍 ${p.location}\n💰 ${p.price}${p.rent ? '/mo' : ''}\n🛏 ${p.beds} beds  🚿 ${p.baths} baths  📐 ${p.sqft} sqft\n\nContact us to schedule a viewing!`;
+    alert(msg);
+  }
+
+  function handleSearch() {
+    document.getElementById('properties').scrollIntoView({ behavior:'smooth' });
+  }
+
+  function handleFormSubmit(e) {
+    e.preventDefault();
+    const btn = e.target.querySelector('button[type=submit]');
+    btn.textContent = 'Sending…';
+    btn.disabled = true;
+    setTimeout(() => {
+      btn.textContent = '✓ Message Sent!';
+      btn.style.background = '#27ae60';
+      setTimeout(() => {
+        btn.textContent = 'Send Message';
+        btn.style.background = '';
+        btn.disabled = false;
+        e.target.reset();
+      }, 3000);
+    }, 1200);
+  }
+
+  // ── SEARCH TABS ──
+  document.querySelectorAll('.search-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.search-tab').forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+    });
+  });
+
+  // ── NAV SCROLL ──
+  window.addEventListener('scroll', () => {
+    document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 20);
+  });
+
+  // ── HAMBURGER ──
+  document.getElementById('hamburger').addEventListener('click', () => {
+    document.getElementById('navLinks').classList.toggle('open');
+    document.getElementById('hamburger').classList.toggle('open');
+  });
+
+  // Close mobile menu when a nav link is tapped
+  document.querySelectorAll('#navLinks a').forEach(link => {
+    link.addEventListener('click', () => {
+      document.getElementById('navLinks').classList.remove('open');
+      document.getElementById('hamburger').classList.remove('open');
+    });
+  });
+
+  // ── SCROLL ANIMATIONS ──
+  function observeFadeUps() {
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target); } });
+    }, { threshold: 0.12 });
+    document.querySelectorAll('.fade-up:not(.visible)').forEach(el => observer.observe(el));
+  }
+
+  // ── INIT ──
+  renderProperties();
+  renderAgents();
+  observeFadeUps();
+</script>
+</body>
+</html>
