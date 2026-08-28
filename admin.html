@@ -269,23 +269,27 @@
     const btn = document.getElementById('loginBtn');
     btn.textContent = 'Signing in…'; btn.disabled = true;
     const { error } = await sb.auth.signInWithPassword({
-      email: document.getElementById('loginEmail').value,
+      email: document.getElementById('loginEmail').value.trim(),
       password: document.getElementById('loginPassword').value
     });
     if (error) {
-      document.getElementById('loginAlert').innerHTML = `<div class="alert alert-error">${error.message}</div>`;
+      let msg = error.message;
+      if (msg.includes('Email not confirmed')) msg = 'Email not confirmed. Go to Supabase → Authentication → Providers → Email → turn OFF "Confirm email", then try again.';
+      if (msg.includes('Invalid login')) msg = 'Wrong email or password. Try signing up first if you have no account.';
+      document.getElementById('loginAlert').innerHTML = `<div class="alert alert-error">${msg}</div>`;
       btn.textContent = 'Sign In'; btn.disabled = false;
     }
   });
 
   document.getElementById('signupLink').addEventListener('click', async (e) => {
     e.preventDefault();
-    const email = document.getElementById('loginEmail').value;
+    const email = document.getElementById('loginEmail').value.trim();
     const password = document.getElementById('loginPassword').value;
-    if (!email || !password) { alert('Fill in email and password first'); return; }
+    if (!email || !password) { document.getElementById('loginAlert').innerHTML = `<div class="alert alert-error">Enter your email and password first, then click Sign Up.</div>`; return; }
+    if (password.length < 6) { document.getElementById('loginAlert').innerHTML = `<div class="alert alert-error">Password must be at least 6 characters.</div>`; return; }
     const { error } = await sb.auth.signUp({ email, password });
     if (error) document.getElementById('loginAlert').innerHTML = `<div class="alert alert-error">${error.message}</div>`;
-    else document.getElementById('loginAlert').innerHTML = `<div class="alert alert-success">Account created! Check your email to confirm, then sign in.</div>`;
+    else document.getElementById('loginAlert').innerHTML = `<div class="alert alert-success">Account created! If email confirmation is ON, check your inbox first. Otherwise click Sign In now.</div>`;
   });
 
   async function signOut() { await sb.auth.signOut(); }
