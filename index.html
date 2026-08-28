@@ -7,6 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -597,7 +598,7 @@
 
 <!-- ══ NAV ══ -->
 <nav id="navbar">
-  <a href="#" class="nav-logo">Moon<span>vera</span></a>
+  <a href="#" class="nav-logo"><img src="logo.png" alt="Moonvera Infra Private Limited" style="height:54px;width:auto;display:block;"></a>
   <ul class="nav-links" id="navLinks">
     <li><a href="#properties">Properties</a></li>
     <li><a href="#services">Services</a></li>
@@ -910,24 +911,24 @@
         <div class="form-row">
           <div class="form-group">
             <label>First Name</label>
-            <input type="text" placeholder="John" required />
+            <input id="firstName" type="text" placeholder="John" required />
           </div>
           <div class="form-group">
             <label>Last Name</label>
-            <input type="text" placeholder="Doe" required />
+            <input id="lastName" type="text" placeholder="Doe" required />
           </div>
         </div>
         <div class="form-group">
           <label>Email</label>
-          <input type="email" placeholder="john@example.com" required />
+          <input id="email" type="email" placeholder="john@example.com" required />
         </div>
         <div class="form-group">
           <label>Phone</label>
-          <input type="tel" placeholder="+1 (555) 000-0000" />
+          <input id="phone" type="tel" placeholder="+91 00000 00000" />
         </div>
         <div class="form-group">
           <label>I'm interested in</label>
-          <select>
+          <select id="interest">
             <option>Buying a Property</option>
             <option>Selling a Property</option>
             <option>Renting a Property</option>
@@ -937,7 +938,7 @@
         </div>
         <div class="form-group">
           <label>Message</label>
-          <textarea rows="4" placeholder="Tell us about your ideal property..."></textarea>
+          <textarea id="message" rows="4" placeholder="Tell us about your ideal property..."></textarea>
         </div>
         <button type="submit" class="btn btn-gold" style="width:100%;padding:.85rem;">Send Message</button>
       </form>
@@ -949,7 +950,7 @@
 <footer>
   <div class="footer-grid">
     <div class="footer-brand">
-      <a href="#" class="nav-logo" style="color:#fff;">Moon<span>vera</span></a>
+      <a href="#" class="nav-logo"><img src="logo.png" alt="Moonvera Infra Private Limited" style="height:64px;width:auto;display:block;filter:brightness(0) invert(1);"></a>
       <p>Moonvera is a premier luxury real estate firm serving discerning buyers, sellers, and investors across the nation's finest markets.</p>
     </div>
     <div class="footer-col">
@@ -1071,12 +1072,33 @@
     document.getElementById('properties').scrollIntoView({ behavior:'smooth' });
   }
 
-  function handleFormSubmit(e) {
+  const _sb = window.supabase.createClient(
+    'https://kqdyemwpacrvrpfxwsrr.supabase.co',
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtxZHllbXdwYWNydnJwZnh3c3JyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc5MDkwNDYsImV4cCI6MjEwMzQ4NTA0Nn0._nEiaiQWUMlV7wCEYi8GZ4hX59t7IQV3d3X9ZOn4dsY'
+  );
+
+  async function handleFormSubmit(e) {
     e.preventDefault();
     const btn = e.target.querySelector('button[type=submit]');
     btn.textContent = 'Sending…';
     btn.disabled = true;
-    setTimeout(() => {
+
+    const { error } = await _sb.from('enquiries').insert({
+      first_name: document.getElementById('firstName').value.trim(),
+      last_name:  document.getElementById('lastName').value.trim(),
+      email:      document.getElementById('email').value.trim(),
+      phone:      document.getElementById('phone').value.trim(),
+      interest:   document.getElementById('interest').value,
+      message:    document.getElementById('message').value.trim()
+    });
+
+    if (error) {
+      console.error('Supabase error:', error.message);
+      btn.textContent = 'Error — try again';
+      btn.style.background = '#e74c3c';
+      btn.disabled = false;
+      setTimeout(() => { btn.textContent = 'Send Message'; btn.style.background = ''; }, 3000);
+    } else {
       btn.textContent = '✓ Message Sent!';
       btn.style.background = '#27ae60';
       setTimeout(() => {
@@ -1085,7 +1107,7 @@
         btn.disabled = false;
         e.target.reset();
       }, 3000);
-    }, 1200);
+    }
   }
 
   // ── SEARCH TABS ──
