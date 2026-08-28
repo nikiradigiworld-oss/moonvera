@@ -92,22 +92,16 @@
 <div id="loginScreen">
   <div class="login-card">
     <h1>Moon<span style="color:var(--gold)">vera</span> Admin</h1>
-    <p>Sign in to manage your website content</p>
+    <p>Enter your admin password to manage website content</p>
     <div id="loginAlert"></div>
     <form id="loginForm">
       <div class="form-field">
-        <label>Email</label>
-        <input type="email" id="loginEmail" placeholder="your@email.com" required />
-      </div>
-      <div class="form-field">
-        <label>Password</label>
-        <input type="password" id="loginPassword" placeholder="••••••••" required />
+        <label>Admin Password</label>
+        <input type="password" id="loginPassword" placeholder="••••••••" required autofocus />
       </div>
       <button type="submit" class="btn btn-gold btn-full" style="margin-top:.5rem" id="loginBtn">Sign In</button>
     </form>
-    <p style="text-align:center;margin-top:1rem;font-size:.8rem;color:var(--gray)">
-      No account? <a href="#" id="signupLink" style="color:var(--gold)">Sign Up</a>
-    </p>
+    <p style="text-align:center;margin-top:1rem;font-size:.8rem;color:var(--gray)">Default password: <strong>Moonvera@2024</strong></p>
   </div>
 </div>
 
@@ -257,42 +251,41 @@
   const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtxZHllbXdwYWNydnJwZnh3c3JyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc5MDkwNDYsImV4cCI6MjEwMzQ4NTA0Nn0._nEiaiQWUMlV7wCEYi8GZ4hX59t7IQV3d3X9ZOn4dsY';
   const sb = window.supabase.createClient(SUPA_URL, SUPA_KEY);
 
-  // ── AUTH ──
-  sb.auth.onAuthStateChange((event, session) => {
-    document.getElementById('loginScreen').style.display = session ? 'none' : 'flex';
-    document.getElementById('adminPanel').style.display  = session ? 'block' : 'none';
-    if (session) loadAll();
-  });
+  // ── AUTH (password-based, no email required) ──
+  const PASS_HASH = '218f3ecd42bfb8e60628978e1028318bf8b7f2676a1ef4262645e1d6c9e56e6e';
+
+  async function sha256(str) {
+    const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+    return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
+  }
+
+  function showPanel(loggedIn) {
+    document.getElementById('loginScreen').style.display = loggedIn ? 'none' : 'flex';
+    document.getElementById('adminPanel').style.display  = loggedIn ? 'block' : 'none';
+    if (loggedIn) loadAll();
+  }
+
+  // Stay logged in during session
+  if (sessionStorage.getItem('mv_admin') === '1') showPanel(true);
 
   document.getElementById('loginForm').addEventListener('submit', async (e) => {
     e.preventDefault();
     const btn = document.getElementById('loginBtn');
-    btn.textContent = 'Signing in…'; btn.disabled = true;
-    const { error } = await sb.auth.signInWithPassword({
-      email: document.getElementById('loginEmail').value.trim(),
-      password: document.getElementById('loginPassword').value
-    });
-    if (error) {
-      let msg = error.message;
-      if (msg.includes('Email not confirmed')) msg = 'Email not confirmed. Go to Supabase → Authentication → Providers → Email → turn OFF "Confirm email", then try again.';
-      if (msg.includes('Invalid login')) msg = 'Wrong email or password. Try signing up first if you have no account.';
-      document.getElementById('loginAlert').innerHTML = `<div class="alert alert-error">${msg}</div>`;
+    btn.textContent = 'Checking…'; btn.disabled = true;
+    const hash = await sha256(document.getElementById('loginPassword').value);
+    if (hash === PASS_HASH) {
+      sessionStorage.setItem('mv_admin', '1');
+      showPanel(true);
+    } else {
+      document.getElementById('loginAlert').innerHTML = `<div class="alert alert-error">Wrong password. Default is <strong>Moonvera@2024</strong></div>`;
       btn.textContent = 'Sign In'; btn.disabled = false;
     }
   });
 
-  document.getElementById('signupLink').addEventListener('click', async (e) => {
-    e.preventDefault();
-    const email = document.getElementById('loginEmail').value.trim();
-    const password = document.getElementById('loginPassword').value;
-    if (!email || !password) { document.getElementById('loginAlert').innerHTML = `<div class="alert alert-error">Enter your email and password first, then click Sign Up.</div>`; return; }
-    if (password.length < 6) { document.getElementById('loginAlert').innerHTML = `<div class="alert alert-error">Password must be at least 6 characters.</div>`; return; }
-    const { error } = await sb.auth.signUp({ email, password });
-    if (error) document.getElementById('loginAlert').innerHTML = `<div class="alert alert-error">${error.message}</div>`;
-    else document.getElementById('loginAlert').innerHTML = `<div class="alert alert-success">Account created! If email confirmation is ON, check your inbox first. Otherwise click Sign In now.</div>`;
-  });
-
-  async function signOut() { await sb.auth.signOut(); }
+  function signOut() {
+    sessionStorage.removeItem('mv_admin');
+    showPanel(false);
+  }
 
   // ── TABS ──
   function switchTab(el, name) {
