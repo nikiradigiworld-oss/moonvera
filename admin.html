@@ -101,7 +101,7 @@
       </div>
       <button type="submit" class="btn btn-gold btn-full" style="margin-top:.5rem" id="loginBtn">Sign In</button>
     </form>
-    <p style="text-align:center;margin-top:1rem;font-size:.8rem;color:var(--gray)">Default password: <strong>Moonvera@2024</strong></p>
+    <p style="text-align:center;margin-top:1rem;font-size:.8rem;color:var(--gray)">Contact admin for password</p>
   </div>
 </div>
 
@@ -252,7 +252,7 @@
   const sb = window.supabase.createClient(SUPA_URL, SUPA_KEY);
 
   // ── AUTH (password-based, no email required) ──
-  const PASS_HASH = '218f3ecd42bfb8e60628978e1028318bf8b7f2676a1ef4262645e1d6c9e56e6e';
+  const PASS_HASH = '2c316ba9e1a416a6e624698c1df2bf7424278e24e44fa0d9057066fe40b50161';
 
   async function sha256(str) {
     const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
@@ -277,7 +277,7 @@
       sessionStorage.setItem('mv_admin', '1');
       showPanel(true);
     } else {
-      document.getElementById('loginAlert').innerHTML = `<div class="alert alert-error">Wrong password. Default is <strong>Moonvera@2024</strong></div>`;
+      document.getElementById('loginAlert').innerHTML = `<div class="alert alert-error">Wrong password. Please try again.</div>`;
       btn.textContent = 'Sign In'; btn.disabled = false;
     }
   });
