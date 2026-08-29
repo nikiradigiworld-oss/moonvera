@@ -589,6 +589,66 @@
       .why-visual { grid-template-columns: 1fr 1fr; }
     }
 
+    /* ── PARTNERS ── */
+    .partners-section { background: var(--white); }
+    .partners-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 2.5rem; margin-top: 3rem;
+    }
+    .partner-card {
+      border: 2px solid var(--border);
+      border-radius: 16px;
+      padding: 2.5rem 2rem;
+      display: flex; flex-direction: column; align-items: center;
+      text-align: center;
+      transition: all .25s;
+      position: relative;
+      overflow: hidden;
+    }
+    .partner-card::before {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0; height: 4px;
+      background: linear-gradient(90deg, var(--gold), var(--gold-light));
+    }
+    .partner-card:hover { border-color: var(--gold); box-shadow: 0 12px 40px rgba(201,168,76,.15); transform: translateY(-4px); }
+    .partner-badge {
+      display: inline-flex; align-items: center; gap: .4rem;
+      padding: .3rem 1rem; border-radius: 100px;
+      font-size: .72rem; font-weight: 700; letter-spacing: 1px; text-transform: uppercase;
+      margin-bottom: 1.5rem;
+    }
+    .partner-badge.global { background: rgba(13,27,42,.08); color: var(--navy); }
+    .partner-badge.india { background: rgba(201,168,76,.12); color: #8a6d1e; }
+    .partner-logo-wrap {
+      width: 120px; height: 120px; border-radius: 50%;
+      background: var(--light-gray);
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 1.5rem; overflow: hidden; border: 3px solid var(--border);
+    }
+    .partner-logo-wrap img { width: 100%; height: 100%; object-fit: contain; padding: 12px; }
+    .partner-logo-initials {
+      font-family: 'Playfair Display', serif;
+      font-size: 2.2rem; font-weight: 700; color: var(--navy);
+      letter-spacing: -1px;
+    }
+    .partner-name {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.25rem; font-weight: 700;
+      color: var(--navy); margin-bottom: .3rem; line-height: 1.3;
+    }
+    .partner-country { font-size: .8rem; font-weight: 600; color: var(--gold); letter-spacing: .5px; margin-bottom: 1rem; text-transform: uppercase; }
+    .partner-address { font-size: .82rem; color: var(--gray); line-height: 1.65; }
+    .partner-contact { margin-top: 1.1rem; font-size: .82rem; color: var(--gray); }
+    .partner-divider {
+      display: flex; align-items: center; gap: 1.5rem;
+      margin-top: 3.5rem; justify-content: center;
+    }
+    .partner-divider-line { flex: 1; max-width: 180px; height: 1px; background: var(--border); }
+    .partner-divider-text { font-size: .75rem; font-weight: 600; color: var(--gray); letter-spacing: 1.5px; text-transform: uppercase; }
+
+    @media (max-width: 768px) {
+      .partners-grid { grid-template-columns: 1fr; gap: 1.5rem; }
+    }
+
     /* â”€â”€ SCROLL ANIMATIONS â”€â”€ */
     .fade-up { opacity: 0; transform: translateY(30px); transition: opacity .6s, transform .6s; }
     .fade-up.visible { opacity: 1; transform: translateY(0); }
@@ -602,6 +662,7 @@
   <ul class="nav-links" id="navLinks">
     <li><a href="#services">Services</a></li>
     <li><a href="#government">Govt. Projects</a></li>
+    <li><a href="#partners">Partners</a></li>
     <li><a href="#why">About Us</a></li>
     <li><a href="#contact">Contact</a></li>
     <li><a href="#contact" class="btn btn-gold">Get in Touch</a></li>
@@ -724,6 +785,57 @@
         <div class="why-box-label">Years in Business</div>
       </div>
     </div>
+  </div>
+</section>
+
+<!-- ══ PARTNERS ══ -->
+<section class="partners-section" id="partners">
+  <div class="section-head fade-up">
+    <div>
+      <div class="section-label">Strategic Alliance</div>
+      <h2 class="section-title">Our Official <em>Partners</em></h2>
+      <p class="section-sub">Moonvera Infra operates through a powerful global-domestic partnership network, bringing together international expertise and local execution capability.</p>
+    </div>
+  </div>
+  <div class="partners-grid">
+    <!-- Global Partner -->
+    <div class="partner-card fade-up">
+      <div class="partner-badge global">🌐 Global Official Partner</div>
+      <div class="partner-logo-wrap">
+        <div class="partner-logo-initials">SW</div>
+      </div>
+      <div class="partner-name">South West Energy Partners, LLC</div>
+      <div class="partner-country">United States of America</div>
+      <div class="partner-address">
+        330 Roberts St., Suite 203<br>
+        East Hartford, Connecticut 06108, USA
+      </div>
+      <div class="partner-contact">
+        📞 432-638-6414 &nbsp;|&nbsp; Fax: 432-686-2644
+      </div>
+    </div>
+    <!-- Indian Partner -->
+    <div class="partner-card fade-up">
+      <div class="partner-badge india">🇮🇳 Indian Official Domestic Partner</div>
+      <div class="partner-logo-wrap">
+        <img src="logo.png" alt="Moonvera Infra Private Limited">
+      </div>
+      <div class="partner-name">Moonvera Infra Private Limited</div>
+      <div class="partner-country">India</div>
+      <div class="partner-address">
+        New No.5, Old No.16, Door No.3C1-1,<br>
+        Thayammal Kudil, Devaraj Pillai Street,<br>
+        West Tambaram, Chennai – 600 045
+      </div>
+      <div class="partner-contact">
+        📞 +91 90804 32168 &nbsp;|&nbsp; +91 63851 06208
+      </div>
+    </div>
+  </div>
+  <div class="partner-divider fade-up">
+    <div class="partner-divider-line"></div>
+    <div class="partner-divider-text">Together Across Borders</div>
+    <div class="partner-divider-line"></div>
   </div>
 </section>
 
