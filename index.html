@@ -931,6 +931,18 @@
   </div>
 </section>
 
+<!-- ══ ACTIVITIES GALLERY ══ -->
+<section id="activities" style="background:var(--white);display:none;">
+  <div class="section-head fade-up">
+    <div>
+      <div class="section-label">Gallery</div>
+      <h2 class="section-title">Our <em>Activities</em></h2>
+      <p class="section-sub">A glimpse into our work, site visits, project milestones, and team moments.</p>
+    </div>
+  </div>
+  <div id="activitiesGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:1.75rem;margin-top:2.5rem;"></div>
+</section>
+
 <!-- ══ CONTACT ══ -->
 <section class="contact-bg" id="contact">
   <div class="contact-inner">
@@ -1096,6 +1108,24 @@
     entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); _observer.unobserve(e.target); } });
   }, { threshold: 0.1 });
   document.querySelectorAll('.fade-up').forEach(el => _observer.observe(el));
+
+  // Activities Gallery
+  (async () => {
+    const { data } = await _sb.from('activities').select('*').order('created_at', { ascending: false });
+    const list = data || [];
+    if (!list.length) return;
+    document.getElementById('activities').style.display = 'block';
+    document.getElementById('activitiesGrid').innerHTML = list.map(a => `
+      <div class="fade-up" style="border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow);background:var(--white);transition:transform .25s,box-shadow .25s;" onmouseover="this.style.transform='translateY(-6px)';this.style.boxShadow='var(--shadow-lg)'" onmouseout="this.style.transform='';this.style.boxShadow='var(--shadow)'">
+        <img src="${a.image_url}" alt="${a.title}" loading="lazy" style="width:100%;height:220px;object-fit:cover;display:block;" />
+        <div style="padding:1.25rem;">
+          <div style="font-weight:700;font-size:1rem;color:var(--navy);margin-bottom:.4rem;">${a.title}</div>
+          ${a.description ? `<p style="font-size:.875rem;color:var(--gray);line-height:1.65;">${a.description}</p>` : ''}
+          <div style="font-size:.75rem;color:var(--gold);font-weight:600;margin-top:.6rem;text-transform:uppercase;letter-spacing:.5px;">${new Date(a.created_at).toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'})}</div>
+        </div>
+      </div>`).join('');
+    document.querySelectorAll('#activitiesGrid .fade-up').forEach(el => _observer.observe(el));
+  })();
 
   // Contact form → Supabase
   async function handleFormSubmit(e) {
