@@ -51,31 +51,12 @@
     .admin-header { background: var(--navy); padding: 0 2rem; height: 60px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
     .admin-header h1 { color: white; font-size: 1.1rem; }
     .admin-header h1 span { color: var(--gold); }
-    .admin-tabs { background: white; border-bottom: 1px solid var(--border); display: flex; padding: 0 2rem; gap: 0; position: sticky; top: 60px; z-index: 99; overflow-x: auto; }
-    .admin-tab { padding: 1rem 1.2rem; font-size: .875rem; font-weight: 600; cursor: pointer; border: none; border-bottom: 2.5px solid transparent; color: var(--gray); transition: all .2s; background: none; white-space: nowrap; }
-    .admin-tab.active { color: var(--navy); border-bottom-color: var(--gold); }
-    .admin-tab:hover { color: var(--navy); }
     .admin-body { padding: 2rem; max-width: 1100px; margin: 0 auto; }
-
-    /* ── PANELS ── */
-    .section-panel { display: none; }
-    .section-panel.active { display: block; }
 
     /* ── CARD ── */
     .card { background: white; border-radius: var(--radius); padding: 1.5rem; box-shadow: 0 2px 8px rgba(0,0,0,.06); margin-bottom: 1.5rem; }
     .card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.25rem; flex-wrap: wrap; gap: .5rem; }
     .card-title { font-size: 1.05rem; font-weight: 700; }
-
-    /* ── TABLE ── */
-    .table-wrap { overflow-x: auto; }
-    table { width: 100%; border-collapse: collapse; }
-    th { text-align: left; font-size: .72rem; font-weight: 700; color: var(--gray); text-transform: uppercase; letter-spacing: .5px; padding: .6rem .75rem; border-bottom: 2px solid var(--border); white-space: nowrap; }
-    td { padding: .7rem .75rem; border-bottom: 1px solid var(--light); font-size: .875rem; vertical-align: middle; }
-    tr:hover td { background: #fafbfc; }
-    .actions { display: flex; gap: .4rem; }
-    .badge-sale { display: inline-block; padding: .2rem .6rem; border-radius: 20px; font-size: .7rem; font-weight: 700; background: #e8f5e9; color: #27ae60; }
-    .badge-rent { display: inline-block; padding: .2rem .6rem; border-radius: 20px; font-size: .7rem; font-weight: 700; background: #e3f2fd; color: #1565c0; }
-    .clip { max-width: 280px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
     /* ── ALERT ── */
     .alert { padding: .7rem 1rem; border-radius: 8px; font-size: .875rem; margin-bottom: 1rem; }
@@ -123,182 +104,55 @@
 <!-- ══ ADMIN PANEL ══ -->
 <div id="adminPanel">
   <header class="admin-header">
-    <h1>Moon<span>vera</span> Admin</h1>
+    <h1>Moon<span>vera</span> Admin — 📸 Activities</h1>
     <div style="display:flex;gap:.75rem;align-items:center">
       <a href="index.html" class="btn btn-outline" style="color:#fff;border-color:rgba(255,255,255,.25);font-size:.8rem">← View Site</a>
       <button class="btn btn-outline" style="color:#fff;border-color:rgba(255,255,255,.25);font-size:.8rem" onclick="signOut()">Sign Out</button>
     </div>
   </header>
 
-  <div class="admin-tabs">
-    <button class="admin-tab active" data-panel="properties" onclick="switchTab(this,'properties')">🏠 Properties</button>
-    <button class="admin-tab" data-panel="agents" onclick="switchTab(this,'agents')">👤 Agents</button>
-    <button class="admin-tab" data-panel="testimonials" onclick="switchTab(this,'testimonials')">💬 Testimonials</button>
-    <button class="admin-tab" data-panel="enquiries" onclick="switchTab(this,'enquiries')">📩 Enquiries</button>
-    <button class="admin-tab" data-panel="activities" onclick="switchTab(this,'activities')">📸 Activities</button>
-  </div>
-
   <div class="admin-body">
 
-    <!-- ── PROPERTIES ── -->
-    <div class="section-panel active" id="panel-properties">
-      <div class="card">
-        <div class="card-header">
-          <div class="card-title" id="prop-form-title">Add New Property</div>
-        </div>
-        <div id="prop-alert"></div>
-        <form id="propForm">
-          <input type="hidden" id="propId" />
-          <div class="form-grid">
-            <div class="form-field span2"><label>Property Name</label><input type="text" id="propName" placeholder="The Meridian Penthouse" required /></div>
-            <div class="form-field"><label>Location</label><input type="text" id="propLocation" placeholder="Nungambakkam, Chennai" required /></div>
-            <div class="form-field"><label>Price</label><input type="text" id="propPrice" placeholder="₹4,25,00,000" required /></div>
-            <div class="form-field"><label>Beds</label><input type="number" id="propBeds" min="0" placeholder="4" /></div>
-            <div class="form-field"><label>Baths</label><input type="number" id="propBaths" min="0" placeholder="3" /></div>
-            <div class="form-field"><label>Area (sqft)</label><input type="text" id="propSqft" placeholder="3,800" /></div>
-            <div class="form-field"><label>Listing Type</label>
-              <select id="propBadge">
-                <option value="For Sale">For Sale</option>
-                <option value="For Rent">For Rent</option>
-              </select>
+    <!-- ── UPLOAD FORM ── -->
+    <div class="card">
+      <div class="card-header"><div class="card-title">Upload Activity Photo</div></div>
+      <div id="act-alert"></div>
+      <form id="actForm">
+        <div class="form-grid">
+          <div class="form-field span2">
+            <label>Activity Title</label>
+            <input type="text" id="actTitle" placeholder="e.g. Site Visit – Chennai Project" required />
+          </div>
+          <div class="form-field span2">
+            <label>Description</label>
+            <textarea id="actDesc" rows="3" placeholder="Brief description of this activity..."></textarea>
+          </div>
+          <div class="form-field span2">
+            <label>Photo</label>
+            <div class="upload-zone" id="uploadZone" onclick="document.getElementById('actPhoto').click()">
+              <div style="font-size:2rem;">📷</div>
+              <p>Click to select a photo or drag & drop here</p>
+              <p style="font-size:.75rem;margin-top:.25rem;">JPG, PNG, WEBP — max 10 MB</p>
             </div>
-            <div class="form-field"><label>Emoji</label><input type="text" id="propEmoji" placeholder="🏙️" /></div>
+            <input type="file" id="actPhoto" accept="image/*" style="display:none" required />
+            <div id="actPreview"><img id="actPreviewImg" src="" alt="Preview" /></div>
+            <div class="progress-bar" id="uploadProgress"><div class="progress-fill" id="uploadFill"></div></div>
           </div>
-          <div class="form-actions">
-            <button type="submit" class="btn btn-gold" id="propSubmitBtn">Add Property</button>
-            <button type="button" class="btn btn-outline" id="propCancelBtn" style="display:none" onclick="resetPropForm()">Cancel</button>
-          </div>
-        </form>
-      </div>
-      <div class="card">
-        <div class="card-header"><div class="card-title">All Properties</div><span id="propCount" style="color:var(--gray);font-size:.85rem"></span></div>
-        <div class="table-wrap">
-          <table>
-            <thead><tr><th>Property</th><th>Location</th><th>Price</th><th>Beds/Baths</th><th>Type</th><th>Actions</th></tr></thead>
-            <tbody id="propTableBody"></tbody>
-          </table>
         </div>
-      </div>
+        <div class="form-actions" style="margin-top:1rem;">
+          <button type="submit" class="btn btn-gold" id="actSubmitBtn">📤 Upload & Save</button>
+          <button type="button" class="btn btn-outline" onclick="resetActForm()">Clear</button>
+        </div>
+      </form>
     </div>
 
-    <!-- ── AGENTS ── -->
-    <div class="section-panel" id="panel-agents">
-      <div class="card">
-        <div class="card-header"><div class="card-title" id="agent-form-title">Add New Agent</div></div>
-        <div id="agent-alert"></div>
-        <form id="agentForm">
-          <input type="hidden" id="agentId" />
-          <div class="form-grid">
-            <div class="form-field"><label>Full Name</label><input type="text" id="agentName" placeholder="Jessica Moore" required /></div>
-            <div class="form-field"><label>Title / Role</label><input type="text" id="agentTitle" placeholder="Senior Agent" /></div>
-            <div class="form-field"><label>Deals Closed</label><input type="number" id="agentDeals" min="0" placeholder="142" /></div>
-            <div class="form-field"><label>Initials (2–3 chars)</label><input type="text" id="agentInitials" placeholder="JM" maxlength="3" /></div>
-            <div class="form-field"><label>Emoji</label><input type="text" id="agentEmoji" placeholder="👩" /></div>
-          </div>
-          <div class="form-actions">
-            <button type="submit" class="btn btn-gold" id="agentSubmitBtn">Add Agent</button>
-            <button type="button" class="btn btn-outline" id="agentCancelBtn" style="display:none" onclick="resetAgentForm()">Cancel</button>
-          </div>
-        </form>
+    <!-- ── ALL PHOTOS ── -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">All Activity Photos</div>
+        <span id="actCount" style="color:var(--gray);font-size:.85rem;"></span>
       </div>
-      <div class="card">
-        <div class="card-header"><div class="card-title">All Agents</div><span id="agentCount" style="color:var(--gray);font-size:.85rem"></span></div>
-        <div class="table-wrap">
-          <table>
-            <thead><tr><th>Agent</th><th>Title</th><th>Deals</th><th>Actions</th></tr></thead>
-            <tbody id="agentTableBody"></tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-
-    <!-- ── TESTIMONIALS ── -->
-    <div class="section-panel" id="panel-testimonials">
-      <div class="card">
-        <div class="card-header"><div class="card-title" id="test-form-title">Add Testimonial</div></div>
-        <div id="test-alert"></div>
-        <form id="testForm">
-          <input type="hidden" id="testId" />
-          <div class="form-grid">
-            <div class="form-field span2"><label>Quote / Review</label><textarea id="testQuote" rows="3" placeholder="Write the client's testimonial..." required></textarea></div>
-            <div class="form-field"><label>Reviewer Name</label><input type="text" id="testName" placeholder="David Harrison" required /></div>
-            <div class="form-field"><label>Role / Location</label><input type="text" id="testRole" placeholder="Buyer — Nungambakkam, Chennai" /></div>
-            <div class="form-field"><label>Initials (2 chars)</label><input type="text" id="testInitials" placeholder="DH" maxlength="3" /></div>
-            <div class="form-field"><label>Stars (1–5)</label><input type="number" id="testStars" min="1" max="5" value="5" /></div>
-          </div>
-          <div class="form-actions">
-            <button type="submit" class="btn btn-gold" id="testSubmitBtn">Add Testimonial</button>
-            <button type="button" class="btn btn-outline" id="testCancelBtn" style="display:none" onclick="resetTestForm()">Cancel</button>
-          </div>
-        </form>
-      </div>
-      <div class="card">
-        <div class="card-header"><div class="card-title">All Testimonials</div><span id="testCount" style="color:var(--gray);font-size:.85rem"></span></div>
-        <div class="table-wrap">
-          <table>
-            <thead><tr><th>Reviewer</th><th>Role</th><th>Stars</th><th>Quote</th><th>Actions</th></tr></thead>
-            <tbody id="testTableBody"></tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-
-    <!-- ── ENQUIRIES ── -->
-    <div class="section-panel" id="panel-enquiries">
-      <div class="card">
-        <div class="card-header">
-          <div class="card-title">All Enquiries</div>
-          <span id="enquiryCount" style="color:var(--gray);font-size:.85rem"></span>
-        </div>
-        <div class="table-wrap">
-          <table>
-            <thead><tr><th>Date</th><th>Name</th><th>Email</th><th>Phone</th><th>Interest</th><th>Message</th></tr></thead>
-            <tbody id="enquiryTableBody"></tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-
-    <!-- ── ACTIVITIES ── -->
-    <div class="section-panel" id="panel-activities">
-      <div class="card">
-        <div class="card-header"><div class="card-title">Upload Activity Photo</div></div>
-        <div id="act-alert"></div>
-        <form id="actForm">
-          <div class="form-grid">
-            <div class="form-field span2">
-              <label>Activity Title</label>
-              <input type="text" id="actTitle" placeholder="e.g. Site Visit – Chennai Project" required />
-            </div>
-            <div class="form-field span2">
-              <label>Description</label>
-              <textarea id="actDesc" rows="3" placeholder="Brief description of this activity..."></textarea>
-            </div>
-            <div class="form-field span2">
-              <label>Photo</label>
-              <div class="upload-zone" id="uploadZone" onclick="document.getElementById('actPhoto').click()">
-                <div style="font-size:2rem;">📷</div>
-                <p>Click to select a photo or drag & drop here</p>
-                <p style="font-size:.75rem;margin-top:.25rem;">JPG, PNG, WEBP — max 10 MB</p>
-              </div>
-              <input type="file" id="actPhoto" accept="image/*" style="display:none" required />
-              <div id="actPreview"><img id="actPreviewImg" src="" alt="Preview" /></div>
-              <div class="progress-bar" id="uploadProgress"><div class="progress-fill" id="uploadFill"></div></div>
-            </div>
-          </div>
-          <div class="form-actions" style="margin-top:1rem;">
-            <button type="submit" class="btn btn-gold" id="actSubmitBtn">📤 Upload & Save</button>
-            <button type="button" class="btn btn-outline" onclick="resetActForm()">Clear</button>
-          </div>
-        </form>
-      </div>
-      <div class="card">
-        <div class="card-header">
-          <div class="card-title">All Activity Photos</div>
-          <span id="actCount" style="color:var(--gray);font-size:.85rem;"></span>
-        </div>
-        <div class="act-grid" id="actGrid"></div>
-      </div>
+      <div class="act-grid" id="actGrid"></div>
     </div>
 
   </div>
@@ -309,7 +163,6 @@
   const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtxZHllbXdwYWNydnJwZnh3c3JyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc5MDkwNDYsImV4cCI6MjEwMzQ4NTA0Nn0._nEiaiQWUMlV7wCEYi8GZ4hX59t7IQV3d3X9ZOn4dsY';
   const sb = window.supabase.createClient(SUPA_URL, SUPA_KEY);
 
-  // ── AUTH (password-based, no email required) ──
   const PASS_HASH = '2c316ba9e1a416a6e624698c1df2bf7424278e24e44fa0d9057066fe40b50161';
 
   async function sha256(str) {
@@ -320,10 +173,9 @@
   function showPanel(loggedIn) {
     document.getElementById('loginScreen').style.display = loggedIn ? 'none' : 'flex';
     document.getElementById('adminPanel').style.display  = loggedIn ? 'block' : 'none';
-    if (loggedIn) loadAll();
+    if (loggedIn) loadActivities();
   }
 
-  // Stay logged in during session
   if (sessionStorage.getItem('mv_admin') === '1') showPanel(true);
 
   document.getElementById('loginForm').addEventListener('submit', async (e) => {
@@ -345,223 +197,10 @@
     showPanel(false);
   }
 
-  // ── TABS ──
-  function switchTab(el, name) {
-    document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
-    document.querySelectorAll('.section-panel').forEach(p => p.classList.remove('active'));
-    el.classList.add('active');
-    document.getElementById('panel-' + name).classList.add('active');
-    ({ properties: loadProperties, agents: loadAgents, testimonials: loadTestimonials, enquiries: loadEnquiries, activities: loadActivities })[name]();
-  }
-
-  async function loadAll() {
-    await Promise.all([loadProperties(), loadAgents(), loadTestimonials(), loadEnquiries(), loadActivities()]);
-  }
-
   function showAlert(id, msg, type = 'success') {
     const el = document.getElementById(id);
     el.innerHTML = `<div class="alert alert-${type}">${msg}</div>`;
     setTimeout(() => el.innerHTML = '', 3500);
-  }
-
-  // ══ PROPERTIES ══
-  async function loadProperties() {
-    const { data, error } = await sb.from('properties').select('*').order('id');
-    if (error) { showAlert('prop-alert', error.message, 'error'); return; }
-    const list = data || [];
-    document.getElementById('propCount').textContent = `${list.length} listing${list.length !== 1 ? 's' : ''}`;
-    document.getElementById('propTableBody').innerHTML = list.length ? list.map(p => `
-      <tr>
-        <td>${p.emoji || ''} <strong>${p.name}</strong></td>
-        <td>${p.location}</td>
-        <td>${p.price}</td>
-        <td>${p.beds || 0} / ${p.baths || 0}</td>
-        <td><span class="${p.is_rental ? 'badge-rent' : 'badge-sale'}">${p.badge}</span></td>
-        <td><div class="actions">
-          <button class="btn btn-outline btn-sm" onclick='editProp(${JSON.stringify(p)})'>Edit</button>
-          <button class="btn btn-red btn-sm" onclick="deleteProp(${p.id})">Delete</button>
-        </div></td>
-      </tr>`).join('') : '<tr><td colspan="6"><div class="empty">No properties yet — add one above.</div></td></tr>';
-  }
-
-  document.getElementById('propForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const id = document.getElementById('propId').value;
-    const badge = document.getElementById('propBadge').value;
-    const payload = {
-      name: document.getElementById('propName').value.trim(),
-      location: document.getElementById('propLocation').value.trim(),
-      price: document.getElementById('propPrice').value.trim(),
-      beds: parseInt(document.getElementById('propBeds').value) || 0,
-      baths: parseInt(document.getElementById('propBaths').value) || 0,
-      sqft: document.getElementById('propSqft').value.trim(),
-      badge, emoji: document.getElementById('propEmoji').value.trim(),
-      is_rental: badge === 'For Rent'
-    };
-    const { error } = id
-      ? await sb.from('properties').update(payload).eq('id', id)
-      : await sb.from('properties').insert(payload);
-    if (error) showAlert('prop-alert', error.message, 'error');
-    else { showAlert('prop-alert', id ? 'Property updated!' : 'Property added!'); resetPropForm(); loadProperties(); }
-  });
-
-  function editProp(p) {
-    document.getElementById('propId').value = p.id;
-    document.getElementById('propName').value = p.name;
-    document.getElementById('propLocation').value = p.location;
-    document.getElementById('propPrice').value = p.price;
-    document.getElementById('propBeds').value = p.beds || '';
-    document.getElementById('propBaths').value = p.baths || '';
-    document.getElementById('propSqft').value = p.sqft || '';
-    document.getElementById('propBadge').value = p.badge;
-    document.getElementById('propEmoji').value = p.emoji || '';
-    document.getElementById('prop-form-title').textContent = 'Edit Property';
-    document.getElementById('propSubmitBtn').textContent = 'Update Property';
-    document.getElementById('propCancelBtn').style.display = 'inline-flex';
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }
-
-  async function deleteProp(id) {
-    if (!confirm('Delete this property? This cannot be undone.')) return;
-    const { error } = await sb.from('properties').delete().eq('id', id);
-    if (error) showAlert('prop-alert', error.message, 'error');
-    else loadProperties();
-  }
-
-  function resetPropForm() {
-    document.getElementById('propForm').reset();
-    document.getElementById('propId').value = '';
-    document.getElementById('prop-form-title').textContent = 'Add New Property';
-    document.getElementById('propSubmitBtn').textContent = 'Add Property';
-    document.getElementById('propCancelBtn').style.display = 'none';
-  }
-
-  // ══ AGENTS ══
-  async function loadAgents() {
-    const { data, error } = await sb.from('agents').select('*').order('id');
-    if (error) { showAlert('agent-alert', error.message, 'error'); return; }
-    const list = data || [];
-    document.getElementById('agentCount').textContent = `${list.length} agent${list.length !== 1 ? 's' : ''}`;
-    document.getElementById('agentTableBody').innerHTML = list.length ? list.map(a => `
-      <tr>
-        <td>${a.emoji || ''} <strong>${a.name}</strong></td>
-        <td>${a.title || '—'}</td>
-        <td>${a.deals || 0} deals</td>
-        <td><div class="actions">
-          <button class="btn btn-outline btn-sm" onclick='editAgent(${JSON.stringify(a)})'>Edit</button>
-          <button class="btn btn-red btn-sm" onclick="deleteAgent(${a.id})">Delete</button>
-        </div></td>
-      </tr>`).join('') : '<tr><td colspan="4"><div class="empty">No agents yet — add one above.</div></td></tr>';
-  }
-
-  document.getElementById('agentForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const id = document.getElementById('agentId').value;
-    const payload = {
-      name: document.getElementById('agentName').value.trim(),
-      title: document.getElementById('agentTitle').value.trim(),
-      deals: parseInt(document.getElementById('agentDeals').value) || 0,
-      initials: document.getElementById('agentInitials').value.trim(),
-      emoji: document.getElementById('agentEmoji').value.trim()
-    };
-    const { error } = id
-      ? await sb.from('agents').update(payload).eq('id', id)
-      : await sb.from('agents').insert(payload);
-    if (error) showAlert('agent-alert', error.message, 'error');
-    else { showAlert('agent-alert', id ? 'Agent updated!' : 'Agent added!'); resetAgentForm(); loadAgents(); }
-  });
-
-  function editAgent(a) {
-    document.getElementById('agentId').value = a.id;
-    document.getElementById('agentName').value = a.name;
-    document.getElementById('agentTitle').value = a.title || '';
-    document.getElementById('agentDeals').value = a.deals || '';
-    document.getElementById('agentInitials').value = a.initials || '';
-    document.getElementById('agentEmoji').value = a.emoji || '';
-    document.getElementById('agent-form-title').textContent = 'Edit Agent';
-    document.getElementById('agentSubmitBtn').textContent = 'Update Agent';
-    document.getElementById('agentCancelBtn').style.display = 'inline-flex';
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }
-
-  async function deleteAgent(id) {
-    if (!confirm('Delete this agent?')) return;
-    const { error } = await sb.from('agents').delete().eq('id', id);
-    if (error) showAlert('agent-alert', error.message, 'error');
-    else loadAgents();
-  }
-
-  function resetAgentForm() {
-    document.getElementById('agentForm').reset();
-    document.getElementById('agentId').value = '';
-    document.getElementById('agent-form-title').textContent = 'Add New Agent';
-    document.getElementById('agentSubmitBtn').textContent = 'Add Agent';
-    document.getElementById('agentCancelBtn').style.display = 'none';
-  }
-
-  // ══ TESTIMONIALS ══
-  async function loadTestimonials() {
-    const { data, error } = await sb.from('testimonials').select('*').order('id');
-    if (error) { showAlert('test-alert', error.message, 'error'); return; }
-    const list = data || [];
-    document.getElementById('testCount').textContent = `${list.length} review${list.length !== 1 ? 's' : ''}`;
-    document.getElementById('testTableBody').innerHTML = list.length ? list.map(t => `
-      <tr>
-        <td><strong>${t.reviewer_name}</strong></td>
-        <td>${t.reviewer_role || '—'}</td>
-        <td>${'★'.repeat(t.stars || 5)}</td>
-        <td class="clip">${t.quote}</td>
-        <td><div class="actions">
-          <button class="btn btn-outline btn-sm" onclick='editTest(${JSON.stringify(t).replace(/'/g, "&#39;")})'>Edit</button>
-          <button class="btn btn-red btn-sm" onclick="deleteTest(${t.id})">Delete</button>
-        </div></td>
-      </tr>`).join('') : '<tr><td colspan="5"><div class="empty">No testimonials yet — add one above.</div></td></tr>';
-  }
-
-  document.getElementById('testForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const id = document.getElementById('testId').value;
-    const payload = {
-      quote: document.getElementById('testQuote').value.trim(),
-      reviewer_name: document.getElementById('testName').value.trim(),
-      reviewer_role: document.getElementById('testRole').value.trim(),
-      initials: document.getElementById('testInitials').value.trim(),
-      stars: parseInt(document.getElementById('testStars').value) || 5
-    };
-    const { error } = id
-      ? await sb.from('testimonials').update(payload).eq('id', id)
-      : await sb.from('testimonials').insert(payload);
-    if (error) showAlert('test-alert', error.message, 'error');
-    else { showAlert('test-alert', id ? 'Testimonial updated!' : 'Testimonial added!'); resetTestForm(); loadTestimonials(); }
-  });
-
-  function editTest(t) {
-    document.getElementById('testId').value = t.id;
-    document.getElementById('testQuote').value = t.quote;
-    document.getElementById('testName').value = t.reviewer_name;
-    document.getElementById('testRole').value = t.reviewer_role || '';
-    document.getElementById('testInitials').value = t.initials || '';
-    document.getElementById('testStars').value = t.stars || 5;
-    document.getElementById('test-form-title').textContent = 'Edit Testimonial';
-    document.getElementById('testSubmitBtn').textContent = 'Update Testimonial';
-    document.getElementById('testCancelBtn').style.display = 'inline-flex';
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }
-
-  async function deleteTest(id) {
-    if (!confirm('Delete this testimonial?')) return;
-    const { error } = await sb.from('testimonials').delete().eq('id', id);
-    if (error) showAlert('test-alert', error.message, 'error');
-    else loadTestimonials();
-  }
-
-  function resetTestForm() {
-    document.getElementById('testForm').reset();
-    document.getElementById('testId').value = '';
-    document.getElementById('testStars').value = 5;
-    document.getElementById('test-form-title').textContent = 'Add Testimonial';
-    document.getElementById('testSubmitBtn').textContent = 'Add Testimonial';
-    document.getElementById('testCancelBtn').style.display = 'none';
   }
 
   // ══ ACTIVITIES ══
@@ -592,6 +231,7 @@
   // Photo preview + drag-drop
   const actPhotoInput = document.getElementById('actPhoto');
   const uploadZone = document.getElementById('uploadZone');
+
   function previewFile(file) {
     if (!file) return;
     const reader = new FileReader();
@@ -602,6 +242,7 @@
     };
     reader.readAsDataURL(file);
   }
+
   actPhotoInput.addEventListener('change', e => previewFile(e.target.files[0]));
   uploadZone.addEventListener('dragover', e => { e.preventDefault(); uploadZone.classList.add('drag'); });
   uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('drag'));
@@ -660,23 +301,6 @@
     document.getElementById('actForm').reset();
     document.getElementById('actPreview').style.display = 'none';
     uploadZone.style.borderColor = '';
-  }
-
-  // ══ ENQUIRIES ══
-  async function loadEnquiries() {
-    const { data, error } = await sb.from('enquiries').select('*').order('created_at', { ascending: false });
-    if (error) return;
-    const list = data || [];
-    document.getElementById('enquiryCount').textContent = `${list.length} total`;
-    document.getElementById('enquiryTableBody').innerHTML = list.length ? list.map(q => `
-      <tr>
-        <td style="white-space:nowrap">${new Date(q.created_at).toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'})}</td>
-        <td><strong>${q.first_name} ${q.last_name}</strong></td>
-        <td><a href="mailto:${q.email}" style="color:var(--gold)">${q.email}</a></td>
-        <td>${q.phone || '—'}</td>
-        <td style="white-space:nowrap">${q.interest || '—'}</td>
-        <td class="clip">${q.message || '—'}</td>
-      </tr>`).join('') : '<tr><td colspan="6"><div class="empty">No enquiries received yet.</div></td></tr>';
   }
 </script>
 </body>
