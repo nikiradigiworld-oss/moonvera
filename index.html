@@ -730,6 +730,15 @@
       .sf-label { display: none; }
     }
 
+    /* ── TEAM SECTION ── */
+    #team { background: var(--white); }
+    .team-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 2rem; margin-top: 2.5rem; justify-items: center; }
+    .team-member { text-align: center; }
+    .team-member img { width: 120px; height: 120px; border-radius: 50%; object-fit: cover; border: 3px solid var(--gold); display: block; margin: 0 auto 1rem; box-shadow: 0 4px 16px rgba(13,27,42,.12); }
+    .team-member-avatar { width: 120px; height: 120px; border-radius: 50%; background: var(--light-gray); border: 3px solid var(--gold); display: flex; align-items: center; justify-content: center; font-size: 2.8rem; margin: 0 auto 1rem; }
+    .team-member-name { font-weight: 700; font-size: 1rem; color: var(--navy); margin-bottom: .25rem; }
+    .team-member-pos { font-size: .83rem; color: var(--gold); font-weight: 600; }
+
     /* ── ACTIVITY SLIDESHOW ── */
     #actSlideshow { position: relative; width: 100%; height: 70vh; min-height: 420px; max-height: 680px; background: var(--navy); overflow: hidden; }
     .slide-item { position: absolute; inset: 0; opacity: 0; transition: opacity .7s ease; }
@@ -964,6 +973,17 @@
 </section>
 
 
+<!-- ══ OUR TEAM ══ -->
+<section id="team" style="display:none;">
+  <div class="section-head fade-up">
+    <div>
+      <div class="section-label">People Behind Moonvera</div>
+      <h2 class="section-title">Our <em>Team</em></h2>
+    </div>
+  </div>
+  <div class="team-cards" id="teamCards"></div>
+</section>
+
 <!-- ══ CONTACT ══ -->
 <section class="contact-bg" id="contact">
   <div class="contact-inner">
@@ -1171,6 +1191,23 @@
     startAuto();
     section.addEventListener('mouseenter', () => clearInterval(timer));
     section.addEventListener('mouseleave', startAuto);
+  })();
+
+  // Our Team
+  (async () => {
+    const { data } = await _sb.from('team').select('*').order('created_at', { ascending: true });
+    const list = data || [];
+    if (!list.length) return;
+    document.getElementById('team').style.display = 'block';
+    document.getElementById('teamCards').innerHTML = list.map(m => `
+      <div class="team-member fade-up">
+        ${m.photo
+          ? `<img src="${m.photo}" alt="${m.name}" loading="lazy" />`
+          : `<div class="team-member-avatar">👤</div>`}
+        <div class="team-member-name">${m.name}</div>
+        <div class="team-member-pos">${m.position}</div>
+      </div>`).join('');
+    document.querySelectorAll('#teamCards .fade-up').forEach(el => _observer.observe(el));
   })();
 
   // Contact form → Supabase
