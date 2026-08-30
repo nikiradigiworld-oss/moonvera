@@ -132,7 +132,7 @@
             <div class="upload-zone" id="uploadZone" onclick="document.getElementById('actPhoto').click()">
               <div style="font-size:2rem;">📷</div>
               <p>Click to select a photo or drag & drop here</p>
-              <p style="font-size:.75rem;margin-top:.25rem;">JPG, PNG, WEBP — max 10 MB</p>
+              <p style="font-size:.75rem;margin-top:.25rem;">JPG, PNG, WEBP — auto compressed</p>
             </div>
             <input type="file" id="actPhoto" accept="image/*" style="display:none" required />
             <div id="actPreview"><img id="actPreviewImg" src="" alt="Preview" /></div>
@@ -222,7 +222,7 @@
           <div class="act-card-desc">${a.description || ''}</div>
           <div style="display:flex;gap:.5rem;align-items:center;">
             <span style="font-size:.72rem;color:var(--gray);">${new Date(a.created_at).toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'})}</span>
-            <button class="btn btn-red btn-sm" style="margin-left:auto" onclick="deleteActivity('${a.id}','${a.image_url}')">Delete</button>
+            <button class="btn btn-red btn-sm" style="margin-left:auto" onclick="deleteActivity('${a.id}')">Delete</button>
           </div>
         </div>
       </div>`).join('');
@@ -256,42 +256,52 @@
     }
   });
 
+  function compressImage(file, maxPx = 1000, quality = 0.75) {
+    return new Promise((resolve) => {
+      const img = new Image();
+      const url = URL.createObjectURL(file);
+      img.onload = () => {
+        let w = img.width, h = img.height;
+        if (w > maxPx || h > maxPx) {
+          if (w > h) { h = Math.round(h * maxPx / w); w = maxPx; }
+          else { w = Math.round(w * maxPx / h); h = maxPx; }
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width = w; canvas.height = h;
+        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+        URL.revokeObjectURL(url);
+        resolve(canvas.toDataURL('image/jpeg', quality));
+      };
+      img.src = url;
+    });
+  }
+
   document.getElementById('actForm').addEventListener('submit', async (e) => {
     e.preventDefault();
     const file = actPhotoInput.files[0];
     if (!file) { showAlert('act-alert', 'Please select a photo first.', 'error'); return; }
     const btn = document.getElementById('actSubmitBtn');
-    btn.textContent = 'Uploading…'; btn.disabled = true;
+    btn.textContent = 'Saving…'; btn.disabled = true;
     document.getElementById('uploadProgress').style.display = 'block';
-    document.getElementById('uploadFill').style.width = '40%';
+    document.getElementById('uploadFill').style.width = '50%';
 
-    const ext = file.name.split('.').pop().toLowerCase();
-    const fileName = `activity_${Date.now()}.${ext}`;
-    const { error: upErr } = await sb.storage.from('activities').upload(fileName, file, { upsert: true });
-    if (upErr) {
-      showAlert('act-alert', 'Upload failed: ' + upErr.message, 'error');
-      btn.textContent = '📤 Upload & Save'; btn.disabled = false;
-      document.getElementById('uploadProgress').style.display = 'none';
-      return;
-    }
+    const base64 = await compressImage(file);
     document.getElementById('uploadFill').style.width = '80%';
-    const { data: { publicUrl } } = sb.storage.from('activities').getPublicUrl(fileName);
+
     const { error } = await sb.from('activities').insert({
       title: document.getElementById('actTitle').value.trim(),
       description: document.getElementById('actDesc').value.trim(),
-      image_url: publicUrl
+      image_url: base64
     });
     document.getElementById('uploadFill').style.width = '100%';
     if (error) showAlert('act-alert', error.message, 'error');
-    else { showAlert('act-alert', '✓ Activity uploaded successfully!'); resetActForm(); loadActivities(); }
+    else { showAlert('act-alert', '✓ Activity saved successfully!'); resetActForm(); loadActivities(); }
     btn.textContent = '📤 Upload & Save'; btn.disabled = false;
     setTimeout(() => document.getElementById('uploadProgress').style.display = 'none', 800);
   });
 
-  async function deleteActivity(id, imageUrl) {
+  async function deleteActivity(id) {
     if (!confirm('Delete this activity photo? This cannot be undone.')) return;
-    const parts = imageUrl.split('/activities/');
-    if (parts[1]) await sb.storage.from('activities').remove([parts[1]]);
     const { error } = await sb.from('activities').delete().eq('id', id);
     if (error) showAlert('act-alert', error.message, 'error');
     else { showAlert('act-alert', 'Photo deleted.'); loadActivities(); }
