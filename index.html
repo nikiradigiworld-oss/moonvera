@@ -1144,35 +1144,43 @@
   }, { threshold: 0.1 });
   document.querySelectorAll('.fade-up').forEach(el => _observer.observe(el));
 
-  // Our News
-  (async () => {
+  async function loadSiteDB() {
     try {
       const res = await fetch('./db.json');
-      const db = await res.json();
-      const list = (db.activities || []).sort((a,b) => new Date(b.created_at) - new Date(a.created_at));
-      if (!list.length) return;
-      document.getElementById('newsSection').style.display = 'block';
-      document.getElementById('newsGrid').innerHTML = list.map(a => {
-        const d = new Date(a.created_at);
-        const date = d.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
-        return `<div class="news-card fade-up">
-          <img class="news-card-img" src="${a.image_url}" alt="${a.title}" loading="lazy" />
-          <div class="news-card-body">
-            <div class="news-card-date">${date}</div>
-            <div class="news-card-title">${a.title}</div>
-            ${a.description ? `<div class="news-card-desc">${a.description}</div>` : ''}
-          </div>
-        </div>`;
-      }).join('');
-      document.querySelectorAll('#newsGrid .fade-up').forEach(el => _observer.observe(el));
-    } catch(e) { /* db.json not found or empty */ }
+      if (res.ok) {
+        const data = await res.json();
+        if ((data.activities||[]).length || (data.team||[]).length) return data;
+      }
+    } catch(e) {}
+    try {
+      return JSON.parse(localStorage.getItem('mv_db') || '{}');
+    } catch(e) { return {}; }
+  }
+
+  // Our News
+  (async () => {
+    const db = await loadSiteDB();
+    const list = (db.activities || []).sort((a,b) => new Date(b.created_at) - new Date(a.created_at));
+    if (!list.length) return;
+    document.getElementById('newsSection').style.display = 'block';
+    document.getElementById('newsGrid').innerHTML = list.map(a => {
+      const d = new Date(a.created_at);
+      const date = d.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+      return `<div class="news-card fade-up">
+        <img class="news-card-img" src="${a.image_url}" alt="${a.title}" loading="lazy" />
+        <div class="news-card-body">
+          <div class="news-card-date">${date}</div>
+          <div class="news-card-title">${a.title}</div>
+          ${a.description ? `<div class="news-card-desc">${a.description}</div>` : ''}
+        </div>
+      </div>`;
+    }).join('');
+    document.querySelectorAll('#newsGrid .fade-up').forEach(el => _observer.observe(el));
   })();
 
   // Our Team
   (async () => {
-    try {
-    const res = await fetch('./db.json');
-    const db = await res.json();
+    const db = await loadSiteDB();
     const list = (db.team || []).sort((a,b) => new Date(a.created_at) - new Date(b.created_at));
     if (!list.length) return;
     document.getElementById('team').style.display = 'block';
@@ -1185,7 +1193,6 @@
         <div class="team-member-pos">${m.position}</div>
       </div>`).join('');
     document.querySelectorAll('#teamCards .fade-up').forEach(el => _observer.observe(el));
-    } catch(e) { /* db.json not available */ }
   })();
 
 </script>

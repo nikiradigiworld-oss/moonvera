@@ -116,6 +116,7 @@
     <h1>Moon<span>vera</span> Admin</h1>
     <div style="display:flex;gap:.6rem;">
       <a href="index.html" class="btn btn-outline" style="color:#fff;border-color:rgba(255,255,255,.3);font-size:.8rem;padding:.4rem .9rem;">← Site</a>
+      <button class="btn btn-outline" style="color:#fff;border-color:rgba(255,255,255,.25);font-size:.8rem;padding:.4rem .9rem;" onclick="document.getElementById('tokenSetup').style.display='block';document.getElementById('tokenInput').value='';document.getElementById('tokenMsg').textContent='';" title="GitHub Token">🔑</button>
       <button class="btn btn-outline" style="color:#fff;border-color:rgba(255,255,255,.25);font-size:.8rem;padding:.4rem .9rem;" onclick="signOut()">Sign Out</button>
     </div>
   </div>
@@ -127,22 +128,24 @@
 
   <div class="body">
 
-    <!-- IMPORT BAR -->
-    <div style="background:#e8f4fd;border:1px solid #90caf9;border-radius:10px;padding:1rem 1.5rem;margin-bottom:1.5rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;">
-      <div>
-        <p style="font-size:.875rem;color:#1565c0;font-weight:700;">📥 Hostinger-ல் இருக்கற data load பண்ண</p>
-        <p style="font-size:.78rem;color:#1976d2;margin-top:.2rem;">Hostinger File Manager → db.json → Download → இங்க import பண்ணுங்க</p>
-      </div>
+    <!-- GITHUB TOKEN SETUP -->
+    <div id="tokenSetup" style="display:none;background:#fff3cd;border:1px solid #ffc107;border-radius:10px;padding:1.25rem 1.5rem;margin-bottom:1.5rem;">
+      <p style="font-size:.9rem;font-weight:700;color:#856404;margin-bottom:.5rem;">🔑 One-time Setup — GitHub Token</p>
+      <p style="font-size:.8rem;color:#856404;margin-bottom:1rem;">github.com → Settings → Developer settings → Personal access tokens → Fine-grained → <strong>Contents: Read & Write</strong> — Token copy பண்ணி paste பண்ணுங்க</p>
       <div style="display:flex;gap:.6rem;flex-wrap:wrap;">
-        <button class="btn btn-outline" style="border-color:#1976d2;color:#1976d2;" onclick="document.getElementById('importFile').click()">📂 Import db.json</button>
-        <input type="file" id="importFile" accept=".json" style="display:none" onchange="importDB(this)" />
+        <input type="password" id="tokenInput" placeholder="github_pat_..." style="flex:1;min-width:200px;padding:.6rem 1rem;border:1.5px solid #ffc107;border-radius:8px;font-size:.875rem;font-family:inherit;outline:none;" />
+        <button class="btn btn-gold" onclick="saveToken()">Save Token</button>
       </div>
+      <p id="tokenMsg" style="font-size:.78rem;margin-top:.5rem;color:#856404;"></p>
     </div>
 
-    <!-- SAVE BAR -->
+    <!-- STATUS BAR -->
+    <div id="statusBar" style="display:none;border-radius:10px;padding:.9rem 1.5rem;margin-bottom:1.5rem;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;"></div>
+
+    <!-- SAVE BAR (fallback) -->
     <div class="save-bar" id="saveBar" style="display:none;">
-      <p>⚠️ Changes saved locally — Download db.json and upload to Hostinger</p>
-      <button class="btn btn-green" onclick="downloadDB()">⬇️ Download db.json</button>
+      <p>⚠️ GitHub save aagala — Token check pannunga</p>
+      <button class="btn btn-outline btn-sm" onclick="document.getElementById('tokenSetup').style.display='block'">🔑 Setup Token</button>
     </div>
 
     <!-- ACTIVITIES -->
@@ -247,19 +250,18 @@
   async function enterPanel() {
     document.getElementById('loginScreen').style.display = 'none';
     document.getElementById('adminPanel').style.display = 'block';
-    loadFromStorage();
-    // If on live server, auto-fetch latest db.json
-    if (location.protocol !== 'file:') {
-      try {
-        const res = await fetch('./db.json?t=' + Date.now());
-        if (res.ok) {
-          const remote = await res.json();
-          if ((remote.activities||[]).length > (db.activities||[]).length) {
-            db = remote;
-            localStorage.setItem('mv_db', JSON.stringify(db));
-          }
-        }
-      } catch(e) {}
+    // Load latest db.json from GitHub Pages (always fresh)
+    try {
+      const res = await fetch('./db.json?t=' + Date.now());
+      if (res.ok) {
+        const remote = await res.json();
+        db = remote;
+        localStorage.setItem('mv_db', JSON.stringify(db));
+      } else { loadFromStorage(); }
+    } catch(e) { loadFromStorage(); }
+    // Show token setup if not configured
+    if (!localStorage.getItem('mv_gh_token')) {
+      document.getElementById('tokenSetup').style.display = 'block';
     }
     renderActivities();
     renderTeam();
@@ -274,6 +276,11 @@
     document.getElementById('panel-' + name).classList.add('active');
   }
 
+  const GH_OWNER = 'nikiradigiworld-oss';
+  const GH_REPO  = 'moonvera';
+  const GH_FILE  = 'db.json';
+  const GH_API   = `https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/contents/${GH_FILE}`;
+
   function loadFromStorage() {
     try {
       const saved = localStorage.getItem('mv_db');
@@ -281,41 +288,79 @@
     } catch(e) {}
   }
 
-  function importDB(input) {
-    const file = input.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = ev => {
-      try {
-        const imported = JSON.parse(ev.target.result);
-        if (!imported.activities && !imported.team) throw new Error('Invalid file');
-        db.activities = imported.activities || [];
-        db.team = imported.team || [];
-        saveToStorage();
-        renderActivities();
-        renderTeam();
-        alert('✅ Import successful!\n\n' + db.activities.length + ' activities, ' + db.team.length + ' team members loaded.');
-      } catch(e) {
-        alert('❌ Error: Valid db.json file select pannunga.');
-      }
-      input.value = '';
+  function showStatus(msg, type) {
+    const bar = document.getElementById('statusBar');
+    const colors = {
+      saving: { bg:'#fff3cd', border:'#ffc107', text:'#856404' },
+      ok:     { bg:'#e8f5e9', border:'#81c784', text:'#2e7d32' },
+      error:  { bg:'#fdecea', border:'#ef9a9a', text:'#c62828' }
     };
-    reader.readAsText(file);
+    const c = colors[type] || colors.ok;
+    bar.style.cssText = `display:flex;background:${c.bg};border:1px solid ${c.border};border-radius:10px;padding:.9rem 1.5rem;margin-bottom:1.5rem;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;`;
+    bar.innerHTML = `<span style="font-size:.875rem;color:${c.text};font-weight:600;">${msg}</span>`;
   }
 
-  function saveToStorage() {
+  function saveToken() {
+    const val = document.getElementById('tokenInput').value.trim();
+    if (!val) { document.getElementById('tokenMsg').textContent = 'Token enter pannunga.'; return; }
+    localStorage.setItem('mv_gh_token', val);
+    document.getElementById('tokenMsg').textContent = '✅ Token saved!';
+    setTimeout(() => { document.getElementById('tokenSetup').style.display = 'none'; }, 1200);
+  }
+
+  async function saveToGitHub(token) {
+    // Get current SHA of db.json
+    const getRes = await fetch(GH_API, {
+      headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/vnd.github+json' }
+    });
+    if (!getRes.ok) {
+      const e = await getRes.json();
+      throw new Error(e.message || 'Cannot read file from GitHub');
+    }
+    const current = await getRes.json();
+
+    // Encode new content as base64
+    const jsonStr = JSON.stringify(db, null, 2);
+    const content = btoa(unescape(encodeURIComponent(jsonStr)));
+
+    // Commit update
+    const putRes = await fetch(GH_API, {
+      method: 'PUT',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Accept': 'application/vnd.github+json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        message: 'Update db.json via admin panel',
+        content,
+        sha: current.sha
+      })
+    });
+    if (!putRes.ok) {
+      const e = await putRes.json();
+      throw new Error(e.message || 'GitHub commit failed');
+    }
+  }
+
+  async function saveToStorage() {
     localStorage.setItem('mv_db', JSON.stringify(db));
-    document.getElementById('saveBar').style.display = 'flex';
-  }
-
-  function downloadDB() {
-    const blob = new Blob([JSON.stringify(db, null, 2)], { type: 'application/json' });
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = 'db.json';
-    a.click();
     document.getElementById('saveBar').style.display = 'none';
-    alert('db.json downloaded!\n\nHostinger File Manager-la ithai upload pannunga.');
+    const token = localStorage.getItem('mv_gh_token');
+    if (!token) {
+      document.getElementById('tokenSetup').style.display = 'block';
+      document.getElementById('saveBar').style.display = 'flex';
+      return;
+    }
+    showStatus('💾 GitHub-la save panrom...', 'saving');
+    try {
+      await saveToGitHub(token);
+      showStatus('✅ Saved! ~1 நிமிடத்தில் website-ல் show ஆகும்.', 'ok');
+      setTimeout(() => document.getElementById('statusBar').style.display = 'none', 4000);
+    } catch(e) {
+      showStatus('⚠️ GitHub save failed: ' + e.message, 'error');
+      document.getElementById('saveBar').style.display = 'flex';
+    }
   }
 
   function compressImage(file, maxPx, quality) {
@@ -367,11 +412,10 @@
       image_url: base64,
       created_at: new Date().toISOString()
     });
-    saveToStorage();
+    await saveToStorage();
     renderActivities();
     resetActForm();
     btn.textContent = '📤 Add Activity'; btn.disabled = false;
-    showAlert('actAlert', '✓ Added! Download db.json and upload to Hostinger.', 'success');
   });
 
   function renderActivities() {
@@ -392,10 +436,10 @@
       </div>`).join('');
   }
 
-  function deleteActivity(id) {
+  async function deleteActivity(id) {
     if (!confirm('Delete this activity?')) return;
     db.activities = db.activities.filter(a => a.id !== id);
-    saveToStorage();
+    await saveToStorage();
     renderActivities();
   }
 
@@ -417,11 +461,10 @@
       photo,
       created_at: new Date().toISOString()
     });
-    saveToStorage();
+    await saveToStorage();
     renderTeam();
     resetTeamForm();
     btn.textContent = '💾 Add Member'; btn.disabled = false;
-    showAlert('teamAlert', '✓ Added! Download db.json and upload to Hostinger.', 'success');
   });
 
   function renderTeam() {
@@ -433,15 +476,68 @@
         ${m.photo ? `<img src="${m.photo}" alt="${m.name}" />` : `<div style="width:80px;height:80px;border-radius:50%;background:var(--light);border:3px solid var(--gold);display:flex;align-items:center;justify-content:center;font-size:2rem;margin:0 auto .6rem;">👤</div>`}
         <div class="team-card-name">${m.name}</div>
         <div class="team-card-pos">${m.position}</div>
-        <button class="btn btn-red btn-sm" onclick="deleteTeam('${m.id}')">Delete</button>
+        <div style="display:flex;gap:.4rem;justify-content:center;margin-top:.3rem;">
+          <button class="btn btn-outline btn-sm" onclick="editTeam('${m.id}')">✏️ Edit</button>
+          <button class="btn btn-red btn-sm" onclick="deleteTeam('${m.id}')">Delete</button>
+        </div>
       </div>`).join('');
   }
 
-  function deleteTeam(id) {
+  async function deleteTeam(id) {
     if (!confirm('Remove this member?')) return;
     db.team = db.team.filter(m => m.id !== id);
-    saveToStorage();
+    await saveToStorage();
     renderTeam();
+  }
+
+  // ── EDIT TEAM ──
+  let _editTeamId = null;
+
+  function editTeam(id) {
+    const m = db.team.find(x => x.id === id);
+    if (!m) return;
+    _editTeamId = id;
+    document.getElementById('editTeamName').value = m.name;
+    document.getElementById('editTeamPos').value = m.position;
+    document.getElementById('editTeamPhoto').value = '';
+    document.getElementById('editTeamImgPreview').style.display = 'none';
+    document.getElementById('editTeamAlert').innerHTML = '';
+    document.getElementById('editTeamModal').style.display = 'flex';
+  }
+
+  function closeEditTeamModal() {
+    document.getElementById('editTeamModal').style.display = 'none';
+    _editTeamId = null;
+  }
+
+  document.getElementById('editTeamPhoto').addEventListener('change', function() {
+    const file = this.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = ev => {
+      document.getElementById('editTeamPreviewImg').src = ev.target.result;
+      document.getElementById('editTeamImgPreview').style.display = 'block';
+    };
+    reader.readAsDataURL(file);
+  });
+
+  async function saveEditTeam() {
+    if (!_editTeamId) return;
+    const name = document.getElementById('editTeamName').value.trim();
+    const position = document.getElementById('editTeamPos').value.trim();
+    if (!name || !position) { showAlert('editTeamAlert', 'Name and position required.', 'error'); return; }
+    const btn = document.getElementById('editTeamSaveBtn');
+    btn.textContent = 'Saving…'; btn.disabled = true;
+    const file = document.getElementById('editTeamPhoto').files[0];
+    const idx = db.team.findIndex(x => x.id === _editTeamId);
+    if (idx === -1) return;
+    if (file) db.team[idx].photo = await compressImage(file, 400, 0.82);
+    db.team[idx].name = name;
+    db.team[idx].position = position;
+    await saveToStorage();
+    renderTeam();
+    closeEditTeamModal();
+    btn.textContent = '💾 Save Changes'; btn.disabled = false;
   }
 
   function resetTeamForm() {
@@ -498,13 +594,47 @@
     if (file) db.activities[idx].image_url = await compressImage(file);
     db.activities[idx].title = title;
     db.activities[idx].description = document.getElementById('editDesc').value.trim();
-    saveToStorage();
+    await saveToStorage();
     renderActivities();
     closeEditModal();
-    showAlert('actAlert', '✓ Activity updated!', 'success');
     btn.textContent = '💾 Save Changes'; btn.disabled = false;
   }
 </script>
+
+<!-- EDIT TEAM MODAL -->
+<div id="editTeamModal" style="display:none">
+  <div class="modal-overlay" onclick="closeEditTeamModal()"></div>
+  <div class="modal-box">
+    <div class="modal-header">
+      <strong style="font-size:1rem;">Edit Team Member</strong>
+      <button class="btn btn-outline btn-sm" onclick="closeEditTeamModal()">✕</button>
+    </div>
+    <div id="editTeamAlert"></div>
+    <div class="field">
+      <label>Full Name</label>
+      <input type="text" id="editTeamName" placeholder="Full name" />
+    </div>
+    <div class="field">
+      <label>Position / Role</label>
+      <input type="text" id="editTeamPos" placeholder="e.g. Managing Director" />
+    </div>
+    <div class="field">
+      <label>Replace Photo <span style="font-weight:400;color:var(--gray)">(optional)</span></label>
+      <div class="upload-zone" onclick="document.getElementById('editTeamPhoto').click()">
+        <div style="font-size:1.5rem;">🧑‍💼</div>
+        <p>Click to select a new photo</p>
+      </div>
+      <input type="file" id="editTeamPhoto" accept="image/*" style="display:none" />
+      <div id="editTeamImgPreview" style="margin-top:.75rem;display:none;text-align:center;">
+        <img id="editTeamPreviewImg" src="" alt="Preview" style="width:100px;height:100px;border-radius:50%;object-fit:cover;border:3px solid var(--gold);" />
+      </div>
+    </div>
+    <div style="display:flex;gap:.6rem;margin-top:1rem;">
+      <button class="btn btn-gold" id="editTeamSaveBtn" onclick="saveEditTeam()">💾 Save Changes</button>
+      <button class="btn btn-outline" onclick="closeEditTeamModal()">Cancel</button>
+    </div>
+  </div>
+</div>
 
 <!-- EDIT ACTIVITY MODAL -->
 <div id="editModal" style="display:none">
