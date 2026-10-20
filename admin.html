@@ -83,7 +83,7 @@
     #teamPreview img { width: 100px; height: 100px; border-radius: 50%; object-fit: cover; border: 3px solid var(--gold); display: block; margin: 0 auto; }
 
     /* EDIT MODAL */
-    #editModal { position: fixed; inset: 0; z-index: 1000; display: flex; align-items: center; justify-content: center; }
+    #editModal, #editTeamModal { position: fixed; inset: 0; z-index: 1000; display: flex; align-items: center; justify-content: center; }
     .modal-overlay { position: absolute; inset: 0; background: rgba(0,0,0,.5); }
     .modal-box { position: relative; background: #fff; border-radius: 14px; padding: 1.75rem; width: 100%; max-width: 480px; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,.3); margin: 1rem; }
     .modal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.25rem; }
@@ -354,22 +354,24 @@
 
   async function saveToStorage() {
     localStorage.setItem('mv_db', JSON.stringify(db));
+    localStorage.setItem('mv_last_save', Date.now().toString());
     document.getElementById('saveBar').style.display = 'none';
     const token = localStorage.getItem('mv_gh_token');
     if (!token) {
       document.getElementById('tokenSetup').style.display = 'block';
       document.getElementById('saveBar').style.display = 'flex';
-      return;
+      return false;
     }
     showStatus('💾 GitHub-la save panrom...', 'saving');
     try {
       await saveToGitHub(token);
-      localStorage.setItem('mv_last_save', Date.now().toString());
       showStatus('✅ Saved! ~1 நிமிடத்தில் website-ல் show ஆகும்.', 'ok');
       setTimeout(() => document.getElementById('statusBar').style.display = 'none', 4000);
+      return true;
     } catch(e) {
       showStatus('⚠️ GitHub save failed: ' + e.message, 'error');
       document.getElementById('saveBar').style.display = 'flex';
+      return false;
     }
   }
 
@@ -576,9 +578,13 @@
       if (file) db.team[idx].photo = await compressImage(file, 400, 0.82);
       db.team[idx].name = name;
       db.team[idx].position = position;
-      await saveToStorage();
-      renderTeam();
-      closeEditTeamModal();
+      const saved = await saveToStorage();
+      if (saved) {
+        renderTeam();
+        closeEditTeamModal();
+      } else {
+        showAlert('editTeamAlert', '⚠️ GitHub save failed — token valid-aa check pannunga. Changes locally saved.', 'error');
+      }
     } catch(e) {
       showAlert('editTeamAlert', '⚠️ Error: ' + e.message, 'error');
     }
@@ -657,9 +663,13 @@
       db.activities[idx].description = document.getElementById('editDesc').value.trim();
       db.activities[idx].images = _editImages;
       delete db.activities[idx].image_url;
-      await saveToStorage();
-      renderActivities();
-      closeEditModal();
+      const saved = await saveToStorage();
+      if (saved) {
+        renderActivities();
+        closeEditModal();
+      } else {
+        showAlert('editAlert', '⚠️ GitHub save failed — token valid-aa check pannunga. Changes locally saved.', 'error');
+      }
     } catch(e) {
       showAlert('editAlert', '⚠️ Error: ' + e.message, 'error');
     }
