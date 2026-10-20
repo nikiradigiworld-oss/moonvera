@@ -232,6 +232,74 @@
   </div>
 </div>
 
+<!-- EDIT TEAM MODAL -->
+<div id="editTeamModal" style="display:none">
+  <div class="modal-overlay" onclick="closeEditTeamModal()"></div>
+  <div class="modal-box">
+    <div class="modal-header">
+      <strong style="font-size:1rem;">Edit Team Member</strong>
+      <button class="btn btn-outline btn-sm" onclick="closeEditTeamModal()">✕</button>
+    </div>
+    <div id="editTeamAlert"></div>
+    <div class="field">
+      <label>Full Name</label>
+      <input type="text" id="editTeamName" placeholder="Full name" />
+    </div>
+    <div class="field">
+      <label>Position / Role</label>
+      <input type="text" id="editTeamPos" placeholder="e.g. Managing Director" />
+    </div>
+    <div class="field">
+      <label>Replace Photo <span style="font-weight:400;color:var(--gray)">(optional)</span></label>
+      <div class="upload-zone" onclick="document.getElementById('editTeamPhoto').click()">
+        <div style="font-size:1.5rem;">🧑‍💼</div>
+        <p>Click to select a new photo</p>
+      </div>
+      <input type="file" id="editTeamPhoto" accept="image/*" style="display:none" />
+      <div id="editTeamImgPreview" style="margin-top:.75rem;display:none;text-align:center;">
+        <img id="editTeamPreviewImg" src="" alt="Preview" style="width:100px;height:100px;border-radius:50%;object-fit:cover;border:3px solid var(--gold);" />
+      </div>
+    </div>
+    <div style="display:flex;gap:.6rem;margin-top:1rem;">
+      <button class="btn btn-gold" id="editTeamSaveBtn" onclick="saveEditTeam()">💾 Save Changes</button>
+      <button class="btn btn-outline" onclick="closeEditTeamModal()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- EDIT ACTIVITY MODAL -->
+<div id="editModal" style="display:none">
+  <div class="modal-overlay" onclick="closeEditModal()"></div>
+  <div class="modal-box">
+    <div class="modal-header">
+      <strong style="font-size:1rem;">Edit Activity</strong>
+      <button class="btn btn-outline btn-sm" onclick="closeEditModal()">✕</button>
+    </div>
+    <div id="editAlert"></div>
+    <div class="field">
+      <label>Title</label>
+      <input type="text" id="editTitle" placeholder="Activity title" />
+    </div>
+    <div class="field">
+      <label>Description</label>
+      <textarea id="editDesc" rows="3" placeholder="Description..."></textarea>
+    </div>
+    <div class="field">
+      <label>Photos</label>
+      <div id="editPhotosGrid" class="photo-preview-grid" style="margin-bottom:.6rem;"></div>
+      <div class="upload-zone" onclick="document.getElementById('editPhoto').click()">
+        <div style="font-size:1.5rem;">📷</div>
+        <p>+ Add more photos</p>
+      </div>
+      <input type="file" id="editPhoto" accept="image/*" multiple style="display:none" />
+    </div>
+    <div style="display:flex;gap:.6rem;margin-top:1rem;">
+      <button class="btn btn-gold" id="editSaveBtn" onclick="saveEditActivity()">💾 Save Changes</button>
+      <button class="btn btn-outline" onclick="closeEditModal()">Cancel</button>
+    </div>
+  </div>
+</div>
+
 <script>
   const PASS_HASH = '2c316ba9e1a416a6e624698c1df2bf7424278e24e44fa0d9057066fe40b50161';
   let db = { activities: [], team: [] };
@@ -679,73 +747,5 @@
     btn.textContent = '💾 Save Changes'; btn.disabled = false;
   }
 </script>
-
-<!-- EDIT TEAM MODAL -->
-<div id="editTeamModal" style="display:none">
-  <div class="modal-overlay" onclick="closeEditTeamModal()"></div>
-  <div class="modal-box">
-    <div class="modal-header">
-      <strong style="font-size:1rem;">Edit Team Member</strong>
-      <button class="btn btn-outline btn-sm" onclick="closeEditTeamModal()">✕</button>
-    </div>
-    <div id="editTeamAlert"></div>
-    <div class="field">
-      <label>Full Name</label>
-      <input type="text" id="editTeamName" placeholder="Full name" />
-    </div>
-    <div class="field">
-      <label>Position / Role</label>
-      <input type="text" id="editTeamPos" placeholder="e.g. Managing Director" />
-    </div>
-    <div class="field">
-      <label>Replace Photo <span style="font-weight:400;color:var(--gray)">(optional)</span></label>
-      <div class="upload-zone" onclick="document.getElementById('editTeamPhoto').click()">
-        <div style="font-size:1.5rem;">🧑‍💼</div>
-        <p>Click to select a new photo</p>
-      </div>
-      <input type="file" id="editTeamPhoto" accept="image/*" style="display:none" />
-      <div id="editTeamImgPreview" style="margin-top:.75rem;display:none;text-align:center;">
-        <img id="editTeamPreviewImg" src="" alt="Preview" style="width:100px;height:100px;border-radius:50%;object-fit:cover;border:3px solid var(--gold);" />
-      </div>
-    </div>
-    <div style="display:flex;gap:.6rem;margin-top:1rem;">
-      <button class="btn btn-gold" id="editTeamSaveBtn" onclick="saveEditTeam()">💾 Save Changes</button>
-      <button class="btn btn-outline" onclick="closeEditTeamModal()">Cancel</button>
-    </div>
-  </div>
-</div>
-
-<!-- EDIT ACTIVITY MODAL -->
-<div id="editModal" style="display:none">
-  <div class="modal-overlay" onclick="closeEditModal()"></div>
-  <div class="modal-box">
-    <div class="modal-header">
-      <strong style="font-size:1rem;">Edit Activity</strong>
-      <button class="btn btn-outline btn-sm" onclick="closeEditModal()">✕</button>
-    </div>
-    <div id="editAlert"></div>
-    <div class="field">
-      <label>Title</label>
-      <input type="text" id="editTitle" placeholder="Activity title" />
-    </div>
-    <div class="field">
-      <label>Description</label>
-      <textarea id="editDesc" rows="3" placeholder="Description..."></textarea>
-    </div>
-    <div class="field">
-      <label>Photos</label>
-      <div id="editPhotosGrid" class="photo-preview-grid" style="margin-bottom:.6rem;"></div>
-      <div class="upload-zone" onclick="document.getElementById('editPhoto').click()">
-        <div style="font-size:1.5rem;">📷</div>
-        <p>+ Add more photos</p>
-      </div>
-      <input type="file" id="editPhoto" accept="image/*" multiple style="display:none" />
-    </div>
-    <div style="display:flex;gap:.6rem;margin-top:1rem;">
-      <button class="btn btn-gold" id="editSaveBtn" onclick="saveEditActivity()">💾 Save Changes</button>
-      <button class="btn btn-outline" onclick="closeEditModal()">Cancel</button>
-    </div>
-  </div>
-</div>
 </body>
 </html>
