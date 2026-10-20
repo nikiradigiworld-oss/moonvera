@@ -74,8 +74,12 @@
     .team-card-name { font-weight: 700; font-size: .88rem; }
     .team-card-pos { font-size: .75rem; color: var(--gray); margin-bottom: .6rem; }
 
-    #actPreview, #teamPreview { margin-top: .75rem; display: none; }
-    #actPreview img { max-width: 100%; max-height: 180px; border-radius: 8px; border: 1px solid var(--border); object-fit: contain; }
+    .photo-preview-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(90px,1fr)); gap: .5rem; margin-top: .75rem; }
+    .photo-preview-item { position: relative; border-radius: 8px; overflow: hidden; aspect-ratio: 1; background: var(--light); }
+    .photo-preview-item img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .photo-preview-item .rm-btn { position: absolute; top: 3px; right: 3px; background: rgba(0,0,0,.65); color: #fff; border: none; border-radius: 50%; width: 20px; height: 20px; font-size: .65rem; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+    .photo-count-badge { position: absolute; bottom: 6px; right: 6px; background: rgba(0,0,0,.6); color: #fff; font-size: .68rem; padding: 2px 7px; border-radius: 10px; pointer-events: none; }
+    #teamPreview { margin-top: .75rem; display: none; }
     #teamPreview img { width: 100px; height: 100px; border-radius: 50%; object-fit: cover; border: 3px solid var(--gold); display: block; margin: 0 auto; }
 
     /* EDIT MODAL */
@@ -163,13 +167,13 @@
             <textarea id="actDesc" rows="3" placeholder="Describe this activity..."></textarea>
           </div>
           <div class="field">
-            <label>Photo</label>
+            <label>Photos <span style="font-weight:400;color:var(--gray)">(multiple select OK)</span></label>
             <div class="upload-zone" onclick="document.getElementById('actPhoto').click()">
               <div style="font-size:1.8rem;">📷</div>
-              <p>Click to select photo — JPG, PNG, WEBP</p>
+              <p>Click to select photos — multiple OK</p>
             </div>
-            <input type="file" id="actPhoto" accept="image/*" style="display:none" required />
-            <div id="actPreview"><img id="actPreviewImg" src="" alt="preview" /></div>
+            <input type="file" id="actPhoto" accept="image/*" multiple style="display:none" />
+            <div id="actPreviewGrid" class="photo-preview-grid" style="display:none;"></div>
           </div>
           <div style="display:flex;gap:.75rem;margin-top:1rem;flex-wrap:wrap;">
             <button type="submit" class="btn btn-gold">📤 Add Activity</button>
@@ -383,33 +387,58 @@
     });
   }
 
-  function previewFile(fileInput, imgId, wrapId) {
-    fileInput.addEventListener('change', e => {
-      const file = e.target.files[0];
-      if (!file) return;
-      const reader = new FileReader();
-      reader.onload = ev => {
-        document.getElementById(imgId).src = ev.target.result;
-        document.getElementById(wrapId).style.display = 'block';
-      };
-      reader.readAsDataURL(file);
-    });
+  // team photo preview (single)
+  document.getElementById('teamPhoto').addEventListener('change', e => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const r = new FileReader();
+    r.onload = ev => { document.getElementById('teamPreviewImg').src = ev.target.result; document.getElementById('teamPreview').style.display = 'block'; };
+    r.readAsDataURL(file);
+  });
+
+  // ── MULTI-PHOTO PREVIEW (add form) ──
+  let _pendingFiles = [];
+
+  function getImages(a) {
+    if (a.images && a.images.length) return a.images;
+    if (a.image_url) return [a.image_url];
+    return [];
   }
 
-  previewFile(document.getElementById('actPhoto'), 'actPreviewImg', 'actPreview');
-  previewFile(document.getElementById('teamPhoto'), 'teamPreviewImg', 'teamPreview');
+  function renderActPreviewGrid() {
+    const grid = document.getElementById('actPreviewGrid');
+    if (!_pendingFiles.length) { grid.style.display = 'none'; return; }
+    grid.style.display = 'grid';
+    grid.innerHTML = _pendingFiles.map((f, i) => {
+      const url = URL.createObjectURL(f);
+      return `<div class="photo-preview-item">
+        <img src="${url}" />
+        <button type="button" class="rm-btn" onclick="removeActFile(${i})">✕</button>
+      </div>`;
+    }).join('');
+  }
+
+  document.getElementById('actPhoto').addEventListener('change', function() {
+    _pendingFiles = [..._pendingFiles, ...this.files];
+    this.value = '';
+    renderActPreviewGrid();
+  });
+
+  function removeActFile(i) {
+    _pendingFiles.splice(i, 1);
+    renderActPreviewGrid();
+  }
 
   document.getElementById('actForm').addEventListener('submit', async (e) => {
     e.preventDefault();
-    const file = document.getElementById('actPhoto').files[0];
-    if (!file) { showAlert('actAlert', 'Photo select pannunga!', 'error'); return; }
+    if (!_pendingFiles.length) { showAlert('actAlert', 'Photo select pannunga!', 'error'); return; }
     const btn = e.submitter; btn.textContent = 'Adding...'; btn.disabled = true;
-    const base64 = await compressImage(file, 1000, 0.78);
+    const images = await Promise.all(_pendingFiles.map(f => compressImage(f, 1000, 0.78)));
     db.activities.unshift({
       id: Date.now().toString(),
       title: document.getElementById('actTitle').value.trim(),
       description: document.getElementById('actDesc').value.trim(),
-      image_url: base64,
+      images,
       created_at: new Date().toISOString()
     });
     await saveToStorage();
@@ -422,9 +451,13 @@
     const grid = document.getElementById('actGrid');
     document.getElementById('actCount').textContent = '(' + db.activities.length + ')';
     if (!db.activities.length) { grid.innerHTML = '<div class="empty" style="grid-column:1/-1">No activities yet.</div>'; return; }
-    grid.innerHTML = db.activities.map(a => `
-      <div class="act-card">
-        <img src="${a.image_url}" alt="${a.title}" loading="lazy" />
+    grid.innerHTML = db.activities.map(a => {
+      const imgs = getImages(a);
+      return `<div class="act-card">
+        <div style="position:relative;">
+          <img src="${imgs[0] || ''}" alt="${a.title}" loading="lazy" />
+          ${imgs.length > 1 ? `<span class="photo-count-badge">📷 ${imgs.length}</span>` : ''}
+        </div>
         <div class="act-card-body">
           <div class="act-card-title">${a.title}</div>
           <div class="act-card-desc">${a.description || ''}</div>
@@ -433,7 +466,8 @@
             <button class="btn btn-red btn-sm" onclick="deleteActivity('${a.id}')">Delete</button>
           </div>
         </div>
-      </div>`).join('');
+      </div>`;
+    }).join('');
   }
 
   async function deleteActivity(id) {
@@ -445,7 +479,8 @@
 
   function resetActForm() {
     document.getElementById('actForm').reset();
-    document.getElementById('actPreview').style.display = 'none';
+    _pendingFiles = [];
+    document.getElementById('actPreviewGrid').style.display = 'none';
   }
 
   document.getElementById('teamForm').addEventListener('submit', async (e) => {
@@ -553,47 +588,64 @@
 
   // ── EDIT ACTIVITY ──
   let _editId = null;
+  let _editImages = [];
+
+  function renderEditPhotosGrid() {
+    const grid = document.getElementById('editPhotosGrid');
+    if (!_editImages.length) { grid.innerHTML = '<p style="font-size:.8rem;color:var(--gray);">No photos</p>'; return; }
+    grid.innerHTML = _editImages.map((src, i) => `
+      <div class="photo-preview-item">
+        <img src="${src}" />
+        <button type="button" class="rm-btn" onclick="removeEditImg(${i})">✕</button>
+      </div>`).join('');
+  }
+
+  function removeEditImg(i) {
+    _editImages.splice(i, 1);
+    renderEditPhotosGrid();
+  }
 
   function editActivity(id) {
     const a = db.activities.find(x => x.id === id);
     if (!a) return;
     _editId = id;
+    _editImages = [...getImages(a)];
     document.getElementById('editTitle').value = a.title;
     document.getElementById('editDesc').value = a.description || '';
     document.getElementById('editPhoto').value = '';
-    document.getElementById('editImgPreview').style.display = 'none';
     document.getElementById('editAlert').innerHTML = '';
+    renderEditPhotosGrid();
     document.getElementById('editModal').style.display = 'flex';
   }
 
   function closeEditModal() {
     document.getElementById('editModal').style.display = 'none';
     _editId = null;
+    _editImages = [];
   }
 
-  document.getElementById('editPhoto').addEventListener('change', function() {
-    const file = this.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = ev => {
-      document.getElementById('editPreviewImg').src = ev.target.result;
-      document.getElementById('editImgPreview').style.display = 'block';
-    };
-    reader.readAsDataURL(file);
+  document.getElementById('editPhoto').addEventListener('change', async function() {
+    const files = [...this.files];
+    if (!files.length) return;
+    const compressed = await Promise.all(files.map(f => compressImage(f, 1000, 0.78)));
+    _editImages = [..._editImages, ...compressed];
+    this.value = '';
+    renderEditPhotosGrid();
   });
 
   async function saveEditActivity() {
     if (!_editId) return;
     const title = document.getElementById('editTitle').value.trim();
     if (!title) { showAlert('editAlert', 'Title is required.', 'error'); return; }
+    if (!_editImages.length) { showAlert('editAlert', 'Minimum 1 photo வேணும்.', 'error'); return; }
     const btn = document.getElementById('editSaveBtn');
     btn.textContent = 'Saving…'; btn.disabled = true;
-    const file = document.getElementById('editPhoto').files[0];
     const idx = db.activities.findIndex(x => x.id === _editId);
     if (idx === -1) return;
-    if (file) db.activities[idx].image_url = await compressImage(file);
     db.activities[idx].title = title;
     db.activities[idx].description = document.getElementById('editDesc').value.trim();
+    db.activities[idx].images = _editImages;
+    delete db.activities[idx].image_url;
     await saveToStorage();
     renderActivities();
     closeEditModal();
@@ -654,15 +706,13 @@
       <textarea id="editDesc" rows="3" placeholder="Description..."></textarea>
     </div>
     <div class="field">
-      <label>Replace Photo <span style="font-weight:400;color:var(--gray)">(optional)</span></label>
+      <label>Photos</label>
+      <div id="editPhotosGrid" class="photo-preview-grid" style="margin-bottom:.6rem;"></div>
       <div class="upload-zone" onclick="document.getElementById('editPhoto').click()">
         <div style="font-size:1.5rem;">📷</div>
-        <p>Click to select a new photo</p>
+        <p>+ Add more photos</p>
       </div>
-      <input type="file" id="editPhoto" accept="image/*" style="display:none" />
-      <div id="editImgPreview">
-        <img id="editPreviewImg" src="" alt="Preview" />
-      </div>
+      <input type="file" id="editPhoto" accept="image/*" multiple style="display:none" />
     </div>
     <div style="display:flex;gap:.6rem;margin-top:1rem;">
       <button class="btn btn-gold" id="editSaveBtn" onclick="saveEditActivity()">💾 Save Changes</button>
