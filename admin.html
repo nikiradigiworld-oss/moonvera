@@ -254,16 +254,21 @@
   async function enterPanel() {
     document.getElementById('loginScreen').style.display = 'none';
     document.getElementById('adminPanel').style.display = 'block';
-    // Load latest db.json from GitHub Pages (always fresh)
-    try {
-      const res = await fetch('./db.json?t=' + Date.now());
-      if (res.ok) {
-        const remote = await res.json();
-        db = remote;
-        localStorage.setItem('mv_db', JSON.stringify(db));
-      } else { loadFromStorage(); }
-    } catch(e) { loadFromStorage(); }
-    // Show token setup if not configured
+    // If saved within last 3 minutes, use localStorage (GitHub Pages not yet rebuilt)
+    const lastSave = parseInt(localStorage.getItem('mv_last_save') || '0');
+    const recentlySaved = (Date.now() - lastSave) < 180000;
+    if (recentlySaved) {
+      loadFromStorage();
+    } else {
+      try {
+        const res = await fetch('./db.json?t=' + Date.now());
+        if (res.ok) {
+          const remote = await res.json();
+          db = remote;
+          localStorage.setItem('mv_db', JSON.stringify(db));
+        } else { loadFromStorage(); }
+      } catch(e) { loadFromStorage(); }
+    }
     if (!localStorage.getItem('mv_gh_token')) {
       document.getElementById('tokenSetup').style.display = 'block';
     }
@@ -359,6 +364,7 @@
     showStatus('💾 GitHub-la save panrom...', 'saving');
     try {
       await saveToGitHub(token);
+      localStorage.setItem('mv_last_save', Date.now().toString());
       showStatus('✅ Saved! ~1 நிமிடத்தில் website-ல் show ஆகும்.', 'ok');
       setTimeout(() => document.getElementById('statusBar').style.display = 'none', 4000);
     } catch(e) {
@@ -563,15 +569,19 @@
     if (!name || !position) { showAlert('editTeamAlert', 'Name and position required.', 'error'); return; }
     const btn = document.getElementById('editTeamSaveBtn');
     btn.textContent = 'Saving…'; btn.disabled = true;
-    const file = document.getElementById('editTeamPhoto').files[0];
-    const idx = db.team.findIndex(x => x.id === _editTeamId);
-    if (idx === -1) return;
-    if (file) db.team[idx].photo = await compressImage(file, 400, 0.82);
-    db.team[idx].name = name;
-    db.team[idx].position = position;
-    await saveToStorage();
-    renderTeam();
-    closeEditTeamModal();
+    try {
+      const file = document.getElementById('editTeamPhoto').files[0];
+      const idx = db.team.findIndex(x => x.id === _editTeamId);
+      if (idx === -1) throw new Error('Member not found');
+      if (file) db.team[idx].photo = await compressImage(file, 400, 0.82);
+      db.team[idx].name = name;
+      db.team[idx].position = position;
+      await saveToStorage();
+      renderTeam();
+      closeEditTeamModal();
+    } catch(e) {
+      showAlert('editTeamAlert', '⚠️ Error: ' + e.message, 'error');
+    }
     btn.textContent = '💾 Save Changes'; btn.disabled = false;
   }
 
@@ -640,15 +650,19 @@
     if (!_editImages.length) { showAlert('editAlert', 'Minimum 1 photo வேணும்.', 'error'); return; }
     const btn = document.getElementById('editSaveBtn');
     btn.textContent = 'Saving…'; btn.disabled = true;
-    const idx = db.activities.findIndex(x => x.id === _editId);
-    if (idx === -1) return;
-    db.activities[idx].title = title;
-    db.activities[idx].description = document.getElementById('editDesc').value.trim();
-    db.activities[idx].images = _editImages;
-    delete db.activities[idx].image_url;
-    await saveToStorage();
-    renderActivities();
-    closeEditModal();
+    try {
+      const idx = db.activities.findIndex(x => x.id === _editId);
+      if (idx === -1) throw new Error('Activity not found');
+      db.activities[idx].title = title;
+      db.activities[idx].description = document.getElementById('editDesc').value.trim();
+      db.activities[idx].images = _editImages;
+      delete db.activities[idx].image_url;
+      await saveToStorage();
+      renderActivities();
+      closeEditModal();
+    } catch(e) {
+      showAlert('editAlert', '⚠️ Error: ' + e.message, 'error');
+    }
     btn.textContent = '💾 Save Changes'; btn.disabled = false;
   }
 </script>
