@@ -117,7 +117,10 @@
 <!-- ADMIN PANEL -->
 <div id="adminPanel">
   <div class="topbar">
-    <h1>Moon<span>vera</span> Admin</h1>
+    <div style="display:flex;align-items:center;gap:.7rem;">
+      <img src="logo-gold.png" alt="Moonvera" style="height:38px;width:38px;border-radius:50%;object-fit:cover;flex-shrink:0;" />
+      <h1>Moon<span>vera</span> Admin</h1>
+    </div>
     <div style="display:flex;gap:.6rem;">
       <a href="index.html" class="btn btn-outline" style="color:#fff;border-color:rgba(255,255,255,.3);font-size:.8rem;padding:.4rem .9rem;">← Site</a>
       <button class="btn btn-outline" style="color:#fff;border-color:rgba(255,255,255,.25);font-size:.8rem;padding:.4rem .9rem;" onclick="document.getElementById('tokenSetup').style.display='block';document.getElementById('tokenInput').value='';document.getElementById('tokenMsg').textContent='';" title="GitHub Token">🔑</button>
