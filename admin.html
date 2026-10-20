@@ -3,213 +3,217 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Moonvera Admin Panel</title>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <title>Moonvera Admin</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    :root {
-      --navy: #0d1b2a; --gold: #c9a84c;
-      --white: #fff; --gray: #6b7280; --light: #f3f4f6;
-      --border: #e5e7eb; --red: #e74c3c; --green: #27ae60; --radius: 10px;
-    }
-    body { font-family: system-ui, sans-serif; background: #f0f2f5; color: var(--navy); min-height: 100vh; }
+    :root { --navy: #0d1b2a; --gold: #c9a84c; --red: #e74c3c; --green: #27ae60; --border: #e5e7eb; --gray: #6b7280; --light: #f3f4f6; }
+    body { font-family: system-ui, sans-serif; background: #f0f2f5; color: var(--navy); }
 
-    /* ── LOGIN ── */
+    /* LOGIN */
     #loginScreen { display: flex; align-items: center; justify-content: center; min-height: 100vh; background: var(--navy); }
-    .login-card { background: white; border-radius: 16px; padding: 2.5rem; width: 100%; max-width: 380px; box-shadow: 0 20px 60px rgba(0,0,0,.3); }
-    .login-card h1 { font-size: 1.5rem; margin-bottom: .25rem; }
-    .login-card p { color: var(--gray); font-size: .875rem; margin-bottom: 1.5rem; }
+    .login-box { background: #fff; border-radius: 16px; padding: 2.5rem; width: 100%; max-width: 360px; box-shadow: 0 20px 60px rgba(0,0,0,.3); }
+    .login-box h1 { font-size: 1.5rem; margin-bottom: .25rem; }
+    .login-box p { color: var(--gray); font-size: .875rem; margin-bottom: 1.5rem; }
+    .field { margin-bottom: 1rem; }
+    .field label { display: block; font-size: .75rem; font-weight: 700; color: var(--gray); margin-bottom: .35rem; text-transform: uppercase; }
+    .field input, .field textarea { width: 100%; padding: .7rem 1rem; border: 1.5px solid var(--border); border-radius: 8px; font-size: .9rem; font-family: inherit; outline: none; }
+    .field input:focus, .field textarea:focus { border-color: var(--gold); }
+    .field textarea { resize: vertical; }
 
-    /* ── FORM ── */
-    .form-field { margin-bottom: 1rem; }
-    .form-field label { display: block; font-size: .75rem; font-weight: 700; color: var(--gray); margin-bottom: .35rem; text-transform: uppercase; letter-spacing: .5px; }
-    .form-field input, .form-field textarea {
-      width: 100%; padding: .7rem 1rem; border: 1.5px solid var(--border);
-      border-radius: 8px; font-size: .9rem; font-family: inherit;
-      outline: none; transition: border-color .2s; background: white;
-    }
-    .form-field input:focus, .form-field textarea:focus { border-color: var(--gold); }
-    .form-field textarea { resize: vertical; }
-    .form-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 1rem; }
-    .form-grid .form-field { margin-bottom: 0; }
-    .form-grid .span2 { grid-column: 1 / -1; }
-    .form-actions { display: flex; gap: .75rem; margin-top: 1.25rem; flex-wrap: wrap; }
-
-    /* ── BUTTONS ── */
-    .btn { display: inline-flex; align-items: center; justify-content: center; padding: .65rem 1.25rem; border-radius: 8px; font-size: .875rem; font-weight: 600; cursor: pointer; border: none; transition: all .2s; text-decoration: none; }
-    .btn-gold { background: var(--gold); color: white; }
+    /* BUTTONS */
+    .btn { display: inline-flex; align-items: center; justify-content: center; gap: .4rem; padding: .65rem 1.25rem; border-radius: 8px; font-size: .875rem; font-weight: 600; cursor: pointer; border: none; transition: all .2s; }
+    .btn-gold { background: var(--gold); color: #fff; }
     .btn-gold:hover { background: #b8943e; }
+    .btn-red { background: var(--red); color: #fff; }
+    .btn-red:hover { background: #c0392b; }
     .btn-outline { background: transparent; border: 1.5px solid var(--border); color: var(--navy); }
     .btn-outline:hover { border-color: var(--gold); color: var(--gold); }
-    .btn-red { background: var(--red); color: white; }
-    .btn-red:hover { background: #c0392b; }
-    .btn-sm { padding: .35rem .75rem; font-size: .78rem; }
+    .btn-green { background: var(--green); color: #fff; }
+    .btn-green:hover { background: #219a52; }
     .btn-full { width: 100%; }
+    .btn-sm { padding: .3rem .7rem; font-size: .78rem; }
 
-    /* ── LAYOUT ── */
+    /* PANEL */
     #adminPanel { display: none; min-height: 100vh; }
-    .admin-header { background: var(--navy); padding: 0 2rem; height: 60px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
-    .admin-header h1 { color: white; font-size: 1.1rem; }
-    .admin-header h1 span { color: var(--gold); }
-    .admin-tabs { background: white; border-bottom: 1px solid var(--border); display: flex; padding: 0 2rem; position: sticky; top: 60px; z-index: 99; }
-    .admin-tab { padding: 1rem 1.4rem; font-size: .875rem; font-weight: 600; cursor: pointer; border: none; border-bottom: 2.5px solid transparent; color: var(--gray); transition: all .2s; background: none; white-space: nowrap; }
-    .admin-tab.active { color: var(--navy); border-bottom-color: var(--gold); }
-    .admin-tab:hover { color: var(--navy); }
-    .admin-body { padding: 2rem; max-width: 1100px; margin: 0 auto; }
-    .section-panel { display: none; }
-    .section-panel.active { display: block; }
-
-    /* ── CARD ── */
-    .card { background: white; border-radius: var(--radius); padding: 1.5rem; box-shadow: 0 2px 8px rgba(0,0,0,.06); margin-bottom: 1.5rem; }
-    .card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.25rem; flex-wrap: wrap; gap: .5rem; }
-    .card-title { font-size: 1.05rem; font-weight: 700; }
-
-    /* ── ALERT ── */
+    .topbar { background: var(--navy); padding: 0 1.5rem; height: 58px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
+    .topbar h1 { color: #fff; font-size: 1.05rem; }
+    .topbar h1 span { color: var(--gold); }
+    .tabs { background: #fff; border-bottom: 1px solid var(--border); display: flex; padding: 0 1.5rem; position: sticky; top: 58px; z-index: 99; }
+    .tab { padding: .9rem 1.25rem; font-size: .875rem; font-weight: 600; cursor: pointer; border: none; border-bottom: 2.5px solid transparent; color: var(--gray); background: none; }
+    .tab.active { color: var(--navy); border-bottom-color: var(--gold); }
+    .body { padding: 1.5rem; max-width: 1000px; margin: 0 auto; }
+    .panel { display: none; }
+    .panel.active { display: block; }
+    .card { background: #fff; border-radius: 10px; padding: 1.5rem; box-shadow: 0 2px 8px rgba(0,0,0,.06); margin-bottom: 1.5rem; }
+    .card-title { font-size: 1rem; font-weight: 700; margin-bottom: 1.25rem; }
     .alert { padding: .7rem 1rem; border-radius: 8px; font-size: .875rem; margin-bottom: 1rem; }
     .alert-error { background: #fdecea; color: var(--red); }
     .alert-success { background: #e8f5e9; color: var(--green); }
-    .empty { text-align: center; color: var(--gray); padding: 2.5rem 1rem; font-size: .9rem; }
+    .empty { text-align: center; color: var(--gray); padding: 2rem; font-size: .9rem; }
 
-    /* ── ACTIVITIES ── */
-    .act-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px,1fr)); gap: 1.25rem; }
-    .act-card { border: 1px solid var(--border); border-radius: 10px; overflow: hidden; background: #fff; }
-    .act-card img { width: 100%; height: 170px; object-fit: cover; display: block; }
-    .act-card-body { padding: .9rem; }
-    .act-card-title { font-weight: 700; font-size: .92rem; margin-bottom: .3rem; }
-    .act-card-desc { font-size: .8rem; color: var(--gray); line-height: 1.55; margin-bottom: .75rem; max-height: 60px; overflow: hidden; }
+    /* SAVE BAR */
+    .save-bar { background: #fff3cd; border: 1px solid #ffc107; border-radius: 10px; padding: 1rem 1.5rem; margin-bottom: 1.5rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
+    .save-bar p { font-size: .875rem; color: #856404; font-weight: 600; }
 
-    /* ── UPLOAD ZONE ── */
-    .upload-zone { border: 2px dashed var(--border); border-radius: 10px; padding: 2rem; text-align: center; cursor: pointer; transition: border-color .2s; background: var(--light); }
-    .upload-zone:hover, .upload-zone.drag { border-color: var(--gold); background: #fdf9f0; }
-    .upload-zone p { color: var(--gray); font-size: .85rem; margin-top: .5rem; }
-    .progress-bar { height: 6px; background: var(--light); border-radius: 3px; margin-top: .75rem; overflow: hidden; display: none; }
-    .progress-fill { height: 100%; background: var(--gold); border-radius: 3px; transition: width .3s; width: 0%; }
+    /* UPLOAD */
+    .upload-zone { border: 2px dashed var(--border); border-radius: 10px; padding: 1.5rem; text-align: center; cursor: pointer; background: var(--light); transition: border-color .2s; }
+    .upload-zone:hover { border-color: var(--gold); background: #fdf9f0; }
+    .upload-zone p { color: var(--gray); font-size: .82rem; margin-top: .4rem; }
 
-    /* ── TEAM ── */
-    .team-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 1.25rem; }
-    .team-card { border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem .75rem; text-align: center; background: #fff; }
-    .team-card img { width: 90px; height: 90px; border-radius: 50%; object-fit: cover; border: 3px solid var(--gold); display: block; margin: 0 auto .75rem; }
-    .team-card-name { font-weight: 700; font-size: .9rem; margin-bottom: .2rem; }
-    .team-card-pos { font-size: .78rem; color: var(--gray); margin-bottom: .75rem; }
-    #teamPreview { margin-top: 1rem; display: none; text-align: center; }
-    #teamPreview img { width: 110px; height: 110px; border-radius: 50%; object-fit: cover; border: 3px solid var(--gold); }
+    /* GRID */
+    .act-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 1rem; }
+    .act-card { border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+    .act-card img { width: 100%; height: 150px; object-fit: cover; display: block; }
+    .act-card-body { padding: .8rem; }
+    .act-card-title { font-weight: 700; font-size: .88rem; margin-bottom: .2rem; }
+    .act-card-desc { font-size: .78rem; color: var(--gray); line-height: 1.5; margin-bottom: .6rem; max-height: 48px; overflow: hidden; }
+
+    .team-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 1rem; }
+    .team-card { border: 1px solid var(--border); border-radius: 12px; padding: 1rem .75rem; text-align: center; background: #fff; }
+    .team-card img { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 3px solid var(--gold); margin: 0 auto .6rem; display: block; }
+    .team-card-name { font-weight: 700; font-size: .88rem; }
+    .team-card-pos { font-size: .75rem; color: var(--gray); margin-bottom: .6rem; }
+
+    #actPreview, #teamPreview { margin-top: .75rem; display: none; }
+    #actPreview img { max-width: 100%; max-height: 180px; border-radius: 8px; border: 1px solid var(--border); object-fit: contain; }
+    #teamPreview img { width: 100px; height: 100px; border-radius: 50%; object-fit: cover; border: 3px solid var(--gold); display: block; margin: 0 auto; }
+
+    /* EDIT MODAL */
+    #editModal { position: fixed; inset: 0; z-index: 1000; display: flex; align-items: center; justify-content: center; }
+    .modal-overlay { position: absolute; inset: 0; background: rgba(0,0,0,.5); }
+    .modal-box { position: relative; background: #fff; border-radius: 14px; padding: 1.75rem; width: 100%; max-width: 480px; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,.3); margin: 1rem; }
+    .modal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.25rem; }
+    #editImgPreview { margin-top: .75rem; display: none; }
+    #editImgPreview img { max-width: 100%; max-height: 180px; border-radius: 8px; border: 1px solid var(--border); object-fit: contain; }
+
+    @media (max-width: 600px) {
+      .act-grid { grid-template-columns: 1fr 1fr; }
+      .save-bar { flex-direction: column; align-items: flex-start; }
+    }
   </style>
 </head>
 <body>
 
-<!-- ══ LOGIN ══ -->
+<!-- LOGIN -->
 <div id="loginScreen">
-  <div class="login-card">
+  <div class="login-box">
     <h1>Moon<span style="color:var(--gold)">vera</span> Admin</h1>
-    <p>Enter your admin password to manage website content</p>
+    <p>Enter password to manage website content</p>
     <div id="loginAlert"></div>
     <form id="loginForm">
-      <div class="form-field">
-        <label>Admin Password</label>
-        <input type="password" id="loginPassword" placeholder="••••••••" required autofocus />
+      <div class="field">
+        <label>Password</label>
+        <input type="password" id="loginPwd" placeholder="••••••••" required autofocus />
       </div>
-      <button type="submit" class="btn btn-gold btn-full" style="margin-top:.5rem" id="loginBtn">Sign In</button>
+      <button type="submit" class="btn btn-gold btn-full" style="margin-top:.25rem">Sign In</button>
     </form>
-    <p style="text-align:center;margin-top:1rem;font-size:.8rem;color:var(--gray)">Contact admin for password</p>
   </div>
 </div>
 
-<!-- ══ ADMIN PANEL ══ -->
+<!-- ADMIN PANEL -->
 <div id="adminPanel">
-  <header class="admin-header">
+  <div class="topbar">
     <h1>Moon<span>vera</span> Admin</h1>
-    <div style="display:flex;gap:.75rem;align-items:center">
-      <a href="index.html" class="btn btn-outline" style="color:#fff;border-color:rgba(255,255,255,.25);font-size:.8rem">← View Site</a>
-      <button class="btn btn-outline" style="color:#fff;border-color:rgba(255,255,255,.25);font-size:.8rem" onclick="signOut()">Sign Out</button>
+    <div style="display:flex;gap:.6rem;">
+      <a href="index.html" class="btn btn-outline" style="color:#fff;border-color:rgba(255,255,255,.3);font-size:.8rem;padding:.4rem .9rem;">← Site</a>
+      <button class="btn btn-outline" style="color:#fff;border-color:rgba(255,255,255,.25);font-size:.8rem;padding:.4rem .9rem;" onclick="signOut()">Sign Out</button>
     </div>
-  </header>
-
-  <div class="admin-tabs">
-    <button class="admin-tab active" onclick="switchTab(this,'activities')">📸 Activities</button>
-    <button class="admin-tab" onclick="switchTab(this,'team')">👥 Our Team</button>
   </div>
 
-  <div class="admin-body">
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab(this,'activities')">📸 Activities</button>
+    <button class="tab" onclick="switchTab(this,'team')">👥 Team</button>
+  </div>
 
-    <!-- ── ACTIVITIES PANEL ── -->
-    <div class="section-panel active" id="panel-activities">
+  <div class="body">
+
+    <!-- IMPORT BAR -->
+    <div style="background:#e8f4fd;border:1px solid #90caf9;border-radius:10px;padding:1rem 1.5rem;margin-bottom:1.5rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;">
+      <div>
+        <p style="font-size:.875rem;color:#1565c0;font-weight:700;">📥 Hostinger-ல் இருக்கற data load பண்ண</p>
+        <p style="font-size:.78rem;color:#1976d2;margin-top:.2rem;">Hostinger File Manager → db.json → Download → இங்க import பண்ணுங்க</p>
+      </div>
+      <div style="display:flex;gap:.6rem;flex-wrap:wrap;">
+        <button class="btn btn-outline" style="border-color:#1976d2;color:#1976d2;" onclick="document.getElementById('importFile').click()">📂 Import db.json</button>
+        <input type="file" id="importFile" accept=".json" style="display:none" onchange="importDB(this)" />
+      </div>
+    </div>
+
+    <!-- SAVE BAR -->
+    <div class="save-bar" id="saveBar" style="display:none;">
+      <p>⚠️ Changes saved locally — Download db.json and upload to Hostinger</p>
+      <button class="btn btn-green" onclick="downloadDB()">⬇️ Download db.json</button>
+    </div>
+
+    <!-- ACTIVITIES -->
+    <div class="panel active" id="panel-activities">
       <div class="card">
-        <div class="card-header"><div class="card-title">Upload Activity Photo</div></div>
-        <div id="act-alert"></div>
+        <div class="card-title">Add Activity Photo</div>
+        <div id="actAlert"></div>
         <form id="actForm">
-          <div class="form-grid">
-            <div class="form-field span2">
-              <label>Activity Title</label>
-              <input type="text" id="actTitle" placeholder="e.g. Site Visit – Chennai Project" required />
-            </div>
-            <div class="form-field span2">
-              <label>Description</label>
-              <textarea id="actDesc" rows="3" placeholder="Brief description of this activity..."></textarea>
-            </div>
-            <div class="form-field span2">
-              <label>Photo</label>
-              <div class="upload-zone" id="uploadZone" onclick="document.getElementById('actPhoto').click()">
-                <div style="font-size:2rem;">📷</div>
-                <p>Click to select a photo or drag & drop here</p>
-                <p style="font-size:.75rem;margin-top:.25rem;">JPG, PNG, WEBP — auto compressed</p>
-              </div>
-              <input type="file" id="actPhoto" accept="image/*" style="display:none" required />
-              <div id="actPreview" style="margin-top:1rem;display:none;"><img id="actPreviewImg" src="" alt="Preview" style="max-width:100%;max-height:220px;border-radius:8px;border:1px solid var(--border);object-fit:contain;" /></div>
-              <div class="progress-bar" id="uploadProgress"><div class="progress-fill" id="uploadFill"></div></div>
-            </div>
+          <div class="field">
+            <label>Title</label>
+            <input type="text" id="actTitle" placeholder="e.g. Site Visit – Chennai Project" required />
           </div>
-          <div class="form-actions" style="margin-top:1rem;">
-            <button type="submit" class="btn btn-gold" id="actSubmitBtn">📤 Upload & Save</button>
+          <div class="field">
+            <label>Description</label>
+            <textarea id="actDesc" rows="3" placeholder="Describe this activity..."></textarea>
+          </div>
+          <div class="field">
+            <label>Photo</label>
+            <div class="upload-zone" onclick="document.getElementById('actPhoto').click()">
+              <div style="font-size:1.8rem;">📷</div>
+              <p>Click to select photo — JPG, PNG, WEBP</p>
+            </div>
+            <input type="file" id="actPhoto" accept="image/*" style="display:none" required />
+            <div id="actPreview"><img id="actPreviewImg" src="" alt="preview" /></div>
+          </div>
+          <div style="display:flex;gap:.75rem;margin-top:1rem;flex-wrap:wrap;">
+            <button type="submit" class="btn btn-gold">📤 Add Activity</button>
             <button type="button" class="btn btn-outline" onclick="resetActForm()">Clear</button>
           </div>
         </form>
       </div>
       <div class="card">
-        <div class="card-header">
-          <div class="card-title">All Activity Photos</div>
-          <span id="actCount" style="color:var(--gray);font-size:.85rem;"></span>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
+          <div class="card-title" style="margin:0;">All Activities <span id="actCount" style="font-size:.82rem;color:var(--gray);font-weight:400;"></span></div>
         </div>
         <div class="act-grid" id="actGrid"></div>
       </div>
     </div>
 
-    <!-- ── TEAM PANEL ── -->
-    <div class="section-panel" id="panel-team">
+    <!-- TEAM -->
+    <div class="panel" id="panel-team">
       <div class="card">
-        <div class="card-header"><div class="card-title">Add Team Member</div></div>
-        <div id="team-alert"></div>
+        <div class="card-title">Add Team Member</div>
+        <div id="teamAlert"></div>
         <form id="teamForm">
-          <div class="form-grid">
-            <div class="form-field">
-              <label>Full Name</label>
-              <input type="text" id="teamName" placeholder="e.g. Ramesh Kumar" required />
-            </div>
-            <div class="form-field">
-              <label>Position / Role</label>
-              <input type="text" id="teamPosition" placeholder="e.g. Managing Director" required />
-            </div>
-            <div class="form-field span2">
-              <label>Passport Size Photo</label>
-              <div class="upload-zone" id="teamUploadZone" onclick="document.getElementById('teamPhoto').click()">
-                <div style="font-size:2rem;">🧑‍💼</div>
-                <p>Click to select passport photo</p>
-                <p style="font-size:.75rem;margin-top:.25rem;">Face visible clearly — auto cropped & compressed</p>
-              </div>
-              <input type="file" id="teamPhoto" accept="image/*" style="display:none" />
-              <div id="teamPreview"><img id="teamPreviewImg" src="" alt="Preview" /></div>
-              <div class="progress-bar" id="teamProgress"><div class="progress-fill" id="teamFill"></div></div>
-            </div>
+          <div class="field">
+            <label>Full Name</label>
+            <input type="text" id="teamName" placeholder="e.g. Ramesh Kumar" required />
           </div>
-          <div class="form-actions" style="margin-top:1rem;">
-            <button type="submit" class="btn btn-gold" id="teamSubmitBtn">💾 Save Member</button>
+          <div class="field">
+            <label>Position / Role</label>
+            <input type="text" id="teamPos" placeholder="e.g. Managing Director" required />
+          </div>
+          <div class="field">
+            <label>Photo (optional)</label>
+            <div class="upload-zone" onclick="document.getElementById('teamPhoto').click()">
+              <div style="font-size:1.8rem;">🧑‍💼</div>
+              <p>Click to select passport photo</p>
+            </div>
+            <input type="file" id="teamPhoto" accept="image/*" style="display:none" />
+            <div id="teamPreview"><img id="teamPreviewImg" src="" alt="preview" /></div>
+          </div>
+          <div style="display:flex;gap:.75rem;margin-top:1rem;flex-wrap:wrap;">
+            <button type="submit" class="btn btn-gold">💾 Add Member</button>
             <button type="button" class="btn btn-outline" onclick="resetTeamForm()">Clear</button>
           </div>
         </form>
       </div>
       <div class="card">
-        <div class="card-header">
-          <div class="card-title">All Team Members</div>
-          <span id="teamCount" style="color:var(--gray);font-size:.85rem;"></span>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
+          <div class="card-title" style="margin:0;">All Team Members <span id="teamCount" style="font-size:.82rem;color:var(--gray);font-weight:400;"></span></div>
         </div>
         <div class="team-grid" id="teamGrid"></div>
       </div>
@@ -219,55 +223,103 @@
 </div>
 
 <script>
-  const SUPA_URL = 'https://kqdyemwpacrvrpfxwsrr.supabase.co';
-  const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtxZHllbXdwYWNydnJwZnh3c3JyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc5MDkwNDYsImV4cCI6MjEwMzQ4NTA0Nn0._nEiaiQWUMlV7wCEYi8GZ4hX59t7IQV3d3X9ZOn4dsY';
-  const sb = window.supabase.createClient(SUPA_URL, SUPA_KEY);
   const PASS_HASH = '2c316ba9e1a416a6e624698c1df2bf7424278e24e44fa0d9057066fe40b50161';
+  let db = { activities: [], team: [] };
 
   async function sha256(str) {
     const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
     return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
   }
 
-  function showPanel(loggedIn) {
-    document.getElementById('loginScreen').style.display = loggedIn ? 'none' : 'flex';
-    document.getElementById('adminPanel').style.display  = loggedIn ? 'block' : 'none';
-    if (loggedIn) { loadActivities(); loadTeam(); }
-  }
-
-  if (sessionStorage.getItem('mv_admin') === '1') showPanel(true);
+  if (sessionStorage.getItem('mv_admin') === '1') enterPanel();
 
   document.getElementById('loginForm').addEventListener('submit', async (e) => {
     e.preventDefault();
-    const btn = document.getElementById('loginBtn');
-    btn.textContent = 'Checking…'; btn.disabled = true;
-    const hash = await sha256(document.getElementById('loginPassword').value);
+    const hash = await sha256(document.getElementById('loginPwd').value);
     if (hash === PASS_HASH) {
       sessionStorage.setItem('mv_admin', '1');
-      showPanel(true);
+      enterPanel();
     } else {
-      document.getElementById('loginAlert').innerHTML = `<div class="alert alert-error">Wrong password. Please try again.</div>`;
-      btn.textContent = 'Sign In'; btn.disabled = false;
+      document.getElementById('loginAlert').innerHTML = '<div class="alert alert-error">Wrong password.</div>';
     }
   });
 
-  function signOut() { sessionStorage.removeItem('mv_admin'); showPanel(false); }
+  async function enterPanel() {
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('adminPanel').style.display = 'block';
+    loadFromStorage();
+    // If on live server, auto-fetch latest db.json
+    if (location.protocol !== 'file:') {
+      try {
+        const res = await fetch('./db.json?t=' + Date.now());
+        if (res.ok) {
+          const remote = await res.json();
+          if ((remote.activities||[]).length > (db.activities||[]).length) {
+            db = remote;
+            localStorage.setItem('mv_db', JSON.stringify(db));
+          }
+        }
+      } catch(e) {}
+    }
+    renderActivities();
+    renderTeam();
+  }
+
+  function signOut() { sessionStorage.removeItem('mv_admin'); location.reload(); }
 
   function switchTab(el, name) {
-    document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
-    document.querySelectorAll('.section-panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
     el.classList.add('active');
     document.getElementById('panel-' + name).classList.add('active');
   }
 
-  function showAlert(id, msg, type = 'success') {
-    const el = document.getElementById(id);
-    el.innerHTML = `<div class="alert alert-${type}">${msg}</div>`;
-    setTimeout(() => el.innerHTML = '', 3500);
+  function loadFromStorage() {
+    try {
+      const saved = localStorage.getItem('mv_db');
+      if (saved) db = JSON.parse(saved);
+    } catch(e) {}
   }
 
-  function compressImage(file, maxPx = 1000, quality = 0.78) {
-    return new Promise((resolve) => {
+  function importDB(input) {
+    const file = input.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = ev => {
+      try {
+        const imported = JSON.parse(ev.target.result);
+        if (!imported.activities && !imported.team) throw new Error('Invalid file');
+        db.activities = imported.activities || [];
+        db.team = imported.team || [];
+        saveToStorage();
+        renderActivities();
+        renderTeam();
+        alert('✅ Import successful!\n\n' + db.activities.length + ' activities, ' + db.team.length + ' team members loaded.');
+      } catch(e) {
+        alert('❌ Error: Valid db.json file select pannunga.');
+      }
+      input.value = '';
+    };
+    reader.readAsText(file);
+  }
+
+  function saveToStorage() {
+    localStorage.setItem('mv_db', JSON.stringify(db));
+    document.getElementById('saveBar').style.display = 'flex';
+  }
+
+  function downloadDB() {
+    const blob = new Blob([JSON.stringify(db, null, 2)], { type: 'application/json' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'db.json';
+    a.click();
+    document.getElementById('saveBar').style.display = 'none';
+    alert('db.json downloaded!\n\nHostinger File Manager-la ithai upload pannunga.');
+  }
+
+  function compressImage(file, maxPx, quality) {
+    return new Promise(resolve => {
       const img = new Image();
       const url = URL.createObjectURL(file);
       img.onload = () => {
@@ -276,170 +328,217 @@
           if (w > h) { h = Math.round(h * maxPx / w); w = maxPx; }
           else { w = Math.round(w * maxPx / h); h = maxPx; }
         }
-        const canvas = document.createElement('canvas');
-        canvas.width = w; canvas.height = h;
-        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+        const c = document.createElement('canvas');
+        c.width = w; c.height = h;
+        c.getContext('2d').drawImage(img, 0, 0, w, h);
         URL.revokeObjectURL(url);
-        resolve(canvas.toDataURL('image/jpeg', quality));
+        resolve(c.toDataURL('image/jpeg', quality));
       };
       img.src = url;
     });
   }
 
-  // ══ ACTIVITIES ══
-  async function loadActivities() {
-    const { data, error } = await sb.from('activities').select('*').order('created_at', { ascending: false });
-    if (error) { showAlert('act-alert', error.message, 'error'); return; }
-    const list = data || [];
-    document.getElementById('actCount').textContent = `${list.length} photo${list.length !== 1 ? 's' : ''}`;
+  function previewFile(fileInput, imgId, wrapId) {
+    fileInput.addEventListener('change', e => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = ev => {
+        document.getElementById(imgId).src = ev.target.result;
+        document.getElementById(wrapId).style.display = 'block';
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  previewFile(document.getElementById('actPhoto'), 'actPreviewImg', 'actPreview');
+  previewFile(document.getElementById('teamPhoto'), 'teamPreviewImg', 'teamPreview');
+
+  document.getElementById('actForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const file = document.getElementById('actPhoto').files[0];
+    if (!file) { showAlert('actAlert', 'Photo select pannunga!', 'error'); return; }
+    const btn = e.submitter; btn.textContent = 'Adding...'; btn.disabled = true;
+    const base64 = await compressImage(file, 1000, 0.78);
+    db.activities.unshift({
+      id: Date.now().toString(),
+      title: document.getElementById('actTitle').value.trim(),
+      description: document.getElementById('actDesc').value.trim(),
+      image_url: base64,
+      created_at: new Date().toISOString()
+    });
+    saveToStorage();
+    renderActivities();
+    resetActForm();
+    btn.textContent = '📤 Add Activity'; btn.disabled = false;
+    showAlert('actAlert', '✓ Added! Download db.json and upload to Hostinger.', 'success');
+  });
+
+  function renderActivities() {
     const grid = document.getElementById('actGrid');
-    if (!list.length) { grid.innerHTML = '<div class="empty" style="grid-column:1/-1">No activities yet — upload one above.</div>'; return; }
-    grid.innerHTML = list.map(a => `
+    document.getElementById('actCount').textContent = '(' + db.activities.length + ')';
+    if (!db.activities.length) { grid.innerHTML = '<div class="empty" style="grid-column:1/-1">No activities yet.</div>'; return; }
+    grid.innerHTML = db.activities.map(a => `
       <div class="act-card">
         <img src="${a.image_url}" alt="${a.title}" loading="lazy" />
         <div class="act-card-body">
           <div class="act-card-title">${a.title}</div>
           <div class="act-card-desc">${a.description || ''}</div>
-          <div style="display:flex;gap:.5rem;align-items:center;">
-            <span style="font-size:.72rem;color:var(--gray);">${new Date(a.created_at).toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'})}</span>
-            <button class="btn btn-red btn-sm" style="margin-left:auto" onclick="deleteActivity('${a.id}')">Delete</button>
+          <div style="display:flex;gap:.4rem;margin-top:.2rem;">
+            <button class="btn btn-outline btn-sm" onclick="editActivity('${a.id}')">✏️ Edit</button>
+            <button class="btn btn-red btn-sm" onclick="deleteActivity('${a.id}')">Delete</button>
           </div>
         </div>
       </div>`).join('');
   }
 
-  const actPhotoInput = document.getElementById('actPhoto');
-  const uploadZone = document.getElementById('uploadZone');
-
-  function previewFile(file, imgId, previewId) {
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = ev => {
-      document.getElementById(imgId).src = ev.target.result;
-      document.getElementById(previewId).style.display = 'block';
-    };
-    reader.readAsDataURL(file);
-  }
-
-  actPhotoInput.addEventListener('change', e => previewFile(e.target.files[0], 'actPreviewImg', 'actPreview'));
-  uploadZone.addEventListener('dragover', e => { e.preventDefault(); uploadZone.classList.add('drag'); });
-  uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('drag'));
-  uploadZone.addEventListener('drop', e => {
-    e.preventDefault(); uploadZone.classList.remove('drag');
-    const file = e.dataTransfer.files[0];
-    if (file && file.type.startsWith('image/')) {
-      const dt = new DataTransfer(); dt.items.add(file);
-      actPhotoInput.files = dt.files;
-      previewFile(file, 'actPreviewImg', 'actPreview');
-    }
-  });
-
-  document.getElementById('actForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const file = actPhotoInput.files[0];
-    if (!file) { showAlert('act-alert', 'Please select a photo first.', 'error'); return; }
-    const btn = document.getElementById('actSubmitBtn');
-    btn.textContent = 'Saving…'; btn.disabled = true;
-    document.getElementById('uploadProgress').style.display = 'block';
-    document.getElementById('uploadFill').style.width = '50%';
-    const base64 = await compressImage(file);
-    document.getElementById('uploadFill').style.width = '80%';
-    const { error } = await sb.from('activities').insert({
-      title: document.getElementById('actTitle').value.trim(),
-      description: document.getElementById('actDesc').value.trim(),
-      image_url: base64
-    });
-    document.getElementById('uploadFill').style.width = '100%';
-    if (error) showAlert('act-alert', error.message, 'error');
-    else { showAlert('act-alert', '✓ Activity saved successfully!'); resetActForm(); loadActivities(); }
-    btn.textContent = '📤 Upload & Save'; btn.disabled = false;
-    setTimeout(() => document.getElementById('uploadProgress').style.display = 'none', 800);
-  });
-
-  async function deleteActivity(id) {
-    if (!confirm('Delete this activity photo? This cannot be undone.')) return;
-    const { error } = await sb.from('activities').delete().eq('id', id);
-    if (error) showAlert('act-alert', error.message, 'error');
-    else { showAlert('act-alert', 'Photo deleted.'); loadActivities(); }
+  function deleteActivity(id) {
+    if (!confirm('Delete this activity?')) return;
+    db.activities = db.activities.filter(a => a.id !== id);
+    saveToStorage();
+    renderActivities();
   }
 
   function resetActForm() {
     document.getElementById('actForm').reset();
     document.getElementById('actPreview').style.display = 'none';
-    uploadZone.style.borderColor = '';
   }
 
-  // ══ TEAM ══
-  async function loadTeam() {
-    const { data, error } = await sb.from('team').select('*').order('created_at', { ascending: true });
-    if (error) { showAlert('team-alert', error.message, 'error'); return; }
-    const list = data || [];
-    document.getElementById('teamCount').textContent = `${list.length} member${list.length !== 1 ? 's' : ''}`;
+  document.getElementById('teamForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const file = document.getElementById('teamPhoto').files[0];
+    const btn = e.submitter; btn.textContent = 'Adding...'; btn.disabled = true;
+    let photo = null;
+    if (file) photo = await compressImage(file, 400, 0.82);
+    db.team.push({
+      id: Date.now().toString(),
+      name: document.getElementById('teamName').value.trim(),
+      position: document.getElementById('teamPos').value.trim(),
+      photo,
+      created_at: new Date().toISOString()
+    });
+    saveToStorage();
+    renderTeam();
+    resetTeamForm();
+    btn.textContent = '💾 Add Member'; btn.disabled = false;
+    showAlert('teamAlert', '✓ Added! Download db.json and upload to Hostinger.', 'success');
+  });
+
+  function renderTeam() {
     const grid = document.getElementById('teamGrid');
-    if (!list.length) { grid.innerHTML = '<div class="empty" style="grid-column:1/-1">No team members yet — add one above.</div>'; return; }
-    grid.innerHTML = list.map(m => `
+    document.getElementById('teamCount').textContent = '(' + db.team.length + ')';
+    if (!db.team.length) { grid.innerHTML = '<div class="empty" style="grid-column:1/-1">No team members yet.</div>'; return; }
+    grid.innerHTML = db.team.map(m => `
       <div class="team-card">
-        ${m.photo ? `<img src="${m.photo}" alt="${m.name}" />` : `<div style="width:90px;height:90px;border-radius:50%;background:var(--light);border:3px solid var(--gold);display:flex;align-items:center;justify-content:center;margin:0 auto .75rem;font-size:2rem;">👤</div>`}
+        ${m.photo ? `<img src="${m.photo}" alt="${m.name}" />` : `<div style="width:80px;height:80px;border-radius:50%;background:var(--light);border:3px solid var(--gold);display:flex;align-items:center;justify-content:center;font-size:2rem;margin:0 auto .6rem;">👤</div>`}
         <div class="team-card-name">${m.name}</div>
         <div class="team-card-pos">${m.position}</div>
         <button class="btn btn-red btn-sm" onclick="deleteTeam('${m.id}')">Delete</button>
       </div>`).join('');
   }
 
-  const teamPhotoInput = document.getElementById('teamPhoto');
-  const teamUploadZone = document.getElementById('teamUploadZone');
-
-  teamPhotoInput.addEventListener('change', e => previewFile(e.target.files[0], 'teamPreviewImg', 'teamPreview'));
-  teamUploadZone.addEventListener('dragover', e => { e.preventDefault(); teamUploadZone.classList.add('drag'); });
-  teamUploadZone.addEventListener('dragleave', () => teamUploadZone.classList.remove('drag'));
-  teamUploadZone.addEventListener('drop', e => {
-    e.preventDefault(); teamUploadZone.classList.remove('drag');
-    const file = e.dataTransfer.files[0];
-    if (file && file.type.startsWith('image/')) {
-      const dt = new DataTransfer(); dt.items.add(file);
-      teamPhotoInput.files = dt.files;
-      previewFile(file, 'teamPreviewImg', 'teamPreview');
-    }
-  });
-
-  document.getElementById('teamForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const btn = document.getElementById('teamSubmitBtn');
-    btn.textContent = 'Saving…'; btn.disabled = true;
-    document.getElementById('teamProgress').style.display = 'block';
-    document.getElementById('teamFill').style.width = '40%';
-
-    let photo = null;
-    const file = teamPhotoInput.files[0];
-    if (file) {
-      photo = await compressImage(file, 400, 0.82);
-    }
-    document.getElementById('teamFill').style.width = '80%';
-
-    const { error } = await sb.from('team').insert({
-      name: document.getElementById('teamName').value.trim(),
-      position: document.getElementById('teamPosition').value.trim(),
-      photo
-    });
-    document.getElementById('teamFill').style.width = '100%';
-    if (error) showAlert('team-alert', error.message, 'error');
-    else { showAlert('team-alert', '✓ Team member saved!'); resetTeamForm(); loadTeam(); }
-    btn.textContent = '💾 Save Member'; btn.disabled = false;
-    setTimeout(() => document.getElementById('teamProgress').style.display = 'none', 800);
-  });
-
-  async function deleteTeam(id) {
-    if (!confirm('Remove this team member?')) return;
-    const { error } = await sb.from('team').delete().eq('id', id);
-    if (error) showAlert('team-alert', error.message, 'error');
-    else { showAlert('team-alert', 'Member removed.'); loadTeam(); }
+  function deleteTeam(id) {
+    if (!confirm('Remove this member?')) return;
+    db.team = db.team.filter(m => m.id !== id);
+    saveToStorage();
+    renderTeam();
   }
 
   function resetTeamForm() {
     document.getElementById('teamForm').reset();
     document.getElementById('teamPreview').style.display = 'none';
-    teamUploadZone.style.borderColor = '';
+  }
+
+  function showAlert(id, msg, type) {
+    const el = document.getElementById(id);
+    el.innerHTML = '<div class="alert alert-' + type + '">' + msg + '</div>';
+    setTimeout(() => el.innerHTML = '', 4000);
+  }
+
+  // ── EDIT ACTIVITY ──
+  let _editId = null;
+
+  function editActivity(id) {
+    const a = db.activities.find(x => x.id === id);
+    if (!a) return;
+    _editId = id;
+    document.getElementById('editTitle').value = a.title;
+    document.getElementById('editDesc').value = a.description || '';
+    document.getElementById('editPhoto').value = '';
+    document.getElementById('editImgPreview').style.display = 'none';
+    document.getElementById('editAlert').innerHTML = '';
+    document.getElementById('editModal').style.display = 'flex';
+  }
+
+  function closeEditModal() {
+    document.getElementById('editModal').style.display = 'none';
+    _editId = null;
+  }
+
+  document.getElementById('editPhoto').addEventListener('change', function() {
+    const file = this.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = ev => {
+      document.getElementById('editPreviewImg').src = ev.target.result;
+      document.getElementById('editImgPreview').style.display = 'block';
+    };
+    reader.readAsDataURL(file);
+  });
+
+  async function saveEditActivity() {
+    if (!_editId) return;
+    const title = document.getElementById('editTitle').value.trim();
+    if (!title) { showAlert('editAlert', 'Title is required.', 'error'); return; }
+    const btn = document.getElementById('editSaveBtn');
+    btn.textContent = 'Saving…'; btn.disabled = true;
+    const file = document.getElementById('editPhoto').files[0];
+    const idx = db.activities.findIndex(x => x.id === _editId);
+    if (idx === -1) return;
+    if (file) db.activities[idx].image_url = await compressImage(file);
+    db.activities[idx].title = title;
+    db.activities[idx].description = document.getElementById('editDesc').value.trim();
+    saveToStorage();
+    renderActivities();
+    closeEditModal();
+    showAlert('actAlert', '✓ Activity updated!', 'success');
+    btn.textContent = '💾 Save Changes'; btn.disabled = false;
   }
 </script>
+
+<!-- EDIT ACTIVITY MODAL -->
+<div id="editModal" style="display:none">
+  <div class="modal-overlay" onclick="closeEditModal()"></div>
+  <div class="modal-box">
+    <div class="modal-header">
+      <strong style="font-size:1rem;">Edit Activity</strong>
+      <button class="btn btn-outline btn-sm" onclick="closeEditModal()">✕</button>
+    </div>
+    <div id="editAlert"></div>
+    <div class="field">
+      <label>Title</label>
+      <input type="text" id="editTitle" placeholder="Activity title" />
+    </div>
+    <div class="field">
+      <label>Description</label>
+      <textarea id="editDesc" rows="3" placeholder="Description..."></textarea>
+    </div>
+    <div class="field">
+      <label>Replace Photo <span style="font-weight:400;color:var(--gray)">(optional)</span></label>
+      <div class="upload-zone" onclick="document.getElementById('editPhoto').click()">
+        <div style="font-size:1.5rem;">📷</div>
+        <p>Click to select a new photo</p>
+      </div>
+      <input type="file" id="editPhoto" accept="image/*" style="display:none" />
+      <div id="editImgPreview">
+        <img id="editPreviewImg" src="" alt="Preview" />
+      </div>
+    </div>
+    <div style="display:flex;gap:.6rem;margin-top:1rem;">
+      <button class="btn btn-gold" id="editSaveBtn" onclick="saveEditActivity()">💾 Save Changes</button>
+      <button class="btn btn-outline" onclick="closeEditModal()">Cancel</button>
+    </div>
+  </div>
+</div>
 </body>
 </html>
