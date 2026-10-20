@@ -25,7 +25,6 @@
   <link rel=”preconnect” href=”https://fonts.googleapis.com” />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -739,29 +738,18 @@
     .team-member-name { font-weight: 700; font-size: 1rem; color: var(--navy); margin-bottom: .25rem; }
     .team-member-pos { font-size: .83rem; color: var(--gold); font-weight: 600; }
 
-    /* ── ACTIVITY SLIDESHOW ── */
-    #actSlideshow { position: relative; width: 100%; height: 70vh; min-height: 420px; max-height: 680px; background: var(--navy); overflow: hidden; }
-    .slide-item { position: absolute; inset: 0; opacity: 0; transition: opacity .7s ease; }
-    .slide-item.active { opacity: 1; }
-    .slide-item img { width: 100%; height: 100%; object-fit: cover; display: block; }
-    .slide-caption {
-      position: absolute; bottom: 0; left: 0; right: 0;
-      background: linear-gradient(to top, rgba(13,27,42,.92) 0%, rgba(13,27,42,.5) 60%, transparent 100%);
-      padding: 3rem 5vw 2rem;
-    }
-    .slide-caption h3 { font-family: 'Playfair Display', serif; font-size: clamp(1.2rem,3vw,2rem); color: #fff; margin-bottom: .4rem; }
-    .slide-caption p { font-size: clamp(.8rem,1.5vw,1rem); color: rgba(255,255,255,.8); max-width: 600px; }
-    .slide-nav { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(255,255,255,.15); backdrop-filter: blur(6px); border: none; color: #fff; font-size: 2rem; width: 52px; height: 52px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background .2s; z-index: 10; }
-    .slide-nav:hover { background: rgba(201,168,76,.7); }
-    .slide-prev { left: 1.5rem; }
-    .slide-next { right: 1.5rem; }
-    .slide-dots { position: absolute; bottom: 1rem; left: 50%; transform: translateX(-50%); display: flex; gap: .5rem; z-index: 10; }
-    .slide-dot { width: 8px; height: 8px; border-radius: 50%; background: rgba(255,255,255,.4); border: none; cursor: pointer; transition: background .3s, transform .3s; padding: 0; }
-    .slide-dot.active { background: var(--gold); transform: scale(1.3); }
-    @media (max-width: 600px) {
-      #actSlideshow { height: 55vw; min-height: 260px; }
-      .slide-nav { width: 38px; height: 38px; font-size: 1.4rem; }
-    }
+    /* ── OUR NEWS ── */
+    #newsSection { background: var(--cream); }
+    .news-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; margin-top: 2.5rem; }
+    .news-card { background: var(--white); border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow); transition: transform .25s, box-shadow .25s; }
+    .news-card:hover { transform: translateY(-5px); box-shadow: var(--shadow-lg); }
+    .news-card-img { width: 100%; height: 220px; object-fit: cover; display: block; }
+    .news-card-body { padding: 1.25rem; }
+    .news-card-date { font-size: .72rem; font-weight: 600; color: var(--gold); text-transform: uppercase; letter-spacing: .5px; margin-bottom: .5rem; }
+    .news-card-title { font-family: 'Playfair Display', serif; font-size: 1.05rem; font-weight: 700; color: var(--navy); margin-bottom: .6rem; line-height: 1.3; }
+    .news-card-desc { font-size: .875rem; color: var(--gray); line-height: 1.7; background: var(--cream); border-left: 3px solid var(--gold); border-radius: 6px; padding: .75rem 1rem; margin-top: .75rem; }
+    @media (max-width: 900px) { .news-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 560px) { .news-grid { grid-template-columns: 1fr; } }
   </style>
 </head>
 <body>
@@ -801,12 +789,16 @@
   </div>
 </section>
 
-<!-- ══ ACTIVITY SLIDESHOW ══ -->
-<section id="actSlideshow" style="display:none;">
-  <div id="slideTrack"></div>
-  <button class="slide-nav slide-prev" onclick="moveSlide(-1)" aria-label="Previous">&#8249;</button>
-  <button class="slide-nav slide-next" onclick="moveSlide(1)" aria-label="Next">&#8250;</button>
-  <div class="slide-dots" id="slideDots"></div>
+<!-- ══ OUR NEWS ══ -->
+<section id="newsSection" style="display:none;">
+  <div class="section-head fade-up">
+    <div>
+      <div class="section-label">Stay Informed</div>
+      <h2 class="section-title">Our Latest <em>News</em> & Updates</h2>
+      <p class="section-sub">Recent activities, events and milestones from Moonvera Infra.</p>
+    </div>
+  </div>
+  <div class="news-grid" id="newsGrid"></div>
 </section>
 
 <!-- ══ SERVICES ══ -->
@@ -912,6 +904,9 @@
       </div>
       <div class="partner-contact">
         📞 432-638-6414 &nbsp;|&nbsp; Fax: 432-686-2644
+      </div>
+      <div class="partner-contact" style="margin-top:8px;">
+        <a href="https://swep-ginvest.com/" target="_blank" rel="noopener noreferrer" style="color:#c9a84c;text-decoration:none;font-weight:600;">🌐 swep-ginvest.com</a>
       </div>
     </div>
     <!-- Indian Partner -->
@@ -1041,28 +1036,28 @@
     </div>
     <div class="contact-form fade-up">
       <h3>Send Us a Message</h3>
-      <form onsubmit="handleFormSubmit(event)">
+      <form action="https://formsubmit.co/moonverainfraprivatelimited@gmail.com" method="POST">
         <div class="form-row">
           <div class="form-group">
             <label>First Name</label>
-            <input id="firstName" type="text" placeholder="Your first name" required />
+            <input id="firstName" name="first_name" type="text" placeholder="Your first name" required />
           </div>
           <div class="form-group">
             <label>Last Name</label>
-            <input id="lastName" type="text" placeholder="Your last name" required />
+            <input id="lastName" name="last_name" type="text" placeholder="Your last name" required />
           </div>
         </div>
         <div class="form-group">
           <label>Email</label>
-          <input id="email" type="email" placeholder="your@email.com" required />
+          <input id="email" name="email" type="email" placeholder="your@email.com" required />
         </div>
         <div class="form-group">
           <label>Phone</label>
-          <input id="phone" type="tel" placeholder="+91 00000 00000" />
+          <input id="phone" name="phone" type="tel" placeholder="+91 00000 00000" />
         </div>
         <div class="form-group">
           <label>I'm interested in</label>
-          <select id="interest">
+          <select id="interest" name="interest">
             <option>Property Consultancy</option>
             <option>Project Management</option>
             <option>International Business Development</option>
@@ -1073,8 +1068,11 @@
         </div>
         <div class="form-group">
           <label>Message</label>
-          <textarea id="message" rows="4" placeholder="Tell us about your project or requirement..."></textarea>
+          <textarea id="message" name="message" rows="4" placeholder="Tell us about your project or requirement..."></textarea>
         </div>
+        <input type="hidden" name="_subject" value="New Enquiry — Moonvera Website" />
+        <input type="hidden" name="_captcha" value="false" />
+        <input type="hidden" name="_next" value="https://moonvera.space/#contact" />
         <button type="submit" class="btn btn-gold" style="width:100%;padding:.85rem;">Send Message</button>
       </form>
     </div>
@@ -1123,10 +1121,6 @@
 </footer>
 
 <script>
-  const _sb = window.supabase.createClient(
-    'https://kqdyemwpacrvrpfxwsrr.supabase.co',
-    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtxZHllbXdwYWNydnJwZnh3c3JyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc5MDkwNDYsImV4cCI6MjEwMzQ4NTA0Nn0._nEiaiQWUMlV7wCEYi8GZ4hX59t7IQV3d3X9ZOn4dsY'
-  );
   // Nav scroll
   window.addEventListener('scroll', () => {
     document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 20);
@@ -1150,53 +1144,36 @@
   }, { threshold: 0.1 });
   document.querySelectorAll('.fade-up').forEach(el => _observer.observe(el));
 
-  // Activity Slideshow
+  // Our News
   (async () => {
-    const { data } = await _sb.from('activities').select('*').order('created_at', { ascending: false });
-    const list = data || [];
-    if (!list.length) return;
-
-    const section = document.getElementById('actSlideshow');
-    const track   = document.getElementById('slideTrack');
-    const dotsEl  = document.getElementById('slideDots');
-    section.style.display = 'block';
-
-    track.innerHTML = list.map((a, i) => `
-      <div class="slide-item${i === 0 ? ' active' : ''}">
-        <img src="${a.image_url}" alt="${a.title}" loading="${i === 0 ? 'eager' : 'lazy'}" />
-        <div class="slide-caption">
-          <h3>${a.title}</h3>
-          ${a.description ? `<p>${a.description}</p>` : ''}
-        </div>
-      </div>`).join('');
-
-    dotsEl.innerHTML = list.map((_, i) =>
-      `<button class="slide-dot${i === 0 ? ' active' : ''}" onclick="goSlide(${i})" aria-label="Slide ${i+1}"></button>`
-    ).join('');
-
-    let cur = 0, timer;
-    const slides = track.querySelectorAll('.slide-item');
-    const dots   = dotsEl.querySelectorAll('.slide-dot');
-
-    window.goSlide = (n) => {
-      slides[cur].classList.remove('active');
-      dots[cur].classList.remove('active');
-      cur = (n + slides.length) % slides.length;
-      slides[cur].classList.add('active');
-      dots[cur].classList.add('active');
-    };
-    window.moveSlide = (dir) => { clearInterval(timer); goSlide(cur + dir); startAuto(); };
-
-    function startAuto() { timer = setInterval(() => goSlide(cur + 1), 4500); }
-    startAuto();
-    section.addEventListener('mouseenter', () => clearInterval(timer));
-    section.addEventListener('mouseleave', startAuto);
+    try {
+      const res = await fetch('./db.json');
+      const db = await res.json();
+      const list = (db.activities || []).sort((a,b) => new Date(b.created_at) - new Date(a.created_at));
+      if (!list.length) return;
+      document.getElementById('newsSection').style.display = 'block';
+      document.getElementById('newsGrid').innerHTML = list.map(a => {
+        const d = new Date(a.created_at);
+        const date = d.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+        return `<div class="news-card fade-up">
+          <img class="news-card-img" src="${a.image_url}" alt="${a.title}" loading="lazy" />
+          <div class="news-card-body">
+            <div class="news-card-date">${date}</div>
+            <div class="news-card-title">${a.title}</div>
+            ${a.description ? `<div class="news-card-desc">${a.description}</div>` : ''}
+          </div>
+        </div>`;
+      }).join('');
+      document.querySelectorAll('#newsGrid .fade-up').forEach(el => _observer.observe(el));
+    } catch(e) { /* db.json not found or empty */ }
   })();
 
   // Our Team
   (async () => {
-    const { data } = await _sb.from('team').select('*').order('created_at', { ascending: true });
-    const list = data || [];
+    try {
+    const res = await fetch('./db.json');
+    const db = await res.json();
+    const list = (db.team || []).sort((a,b) => new Date(a.created_at) - new Date(b.created_at));
     if (!list.length) return;
     document.getElementById('team').style.display = 'block';
     document.getElementById('teamCards').innerHTML = list.map(m => `
@@ -1208,29 +1185,9 @@
         <div class="team-member-pos">${m.position}</div>
       </div>`).join('');
     document.querySelectorAll('#teamCards .fade-up').forEach(el => _observer.observe(el));
+    } catch(e) { /* db.json not available */ }
   })();
 
-  // Contact form → Supabase
-  async function handleFormSubmit(e) {
-    e.preventDefault();
-    const btn = e.target.querySelector('button[type=submit]');
-    btn.textContent = 'Sending…'; btn.disabled = true;
-    const { error } = await _sb.from('enquiries').insert({
-      first_name: document.getElementById('firstName').value.trim(),
-      last_name:  document.getElementById('lastName').value.trim(),
-      email:      document.getElementById('email').value.trim(),
-      phone:      document.getElementById('phone').value.trim(),
-      interest:   document.getElementById('interest').value,
-      message:    document.getElementById('message').value.trim()
-    });
-    if (error) {
-      btn.textContent = 'Error — try again'; btn.style.background = '#e74c3c'; btn.disabled = false;
-      setTimeout(() => { btn.textContent = 'Send Message'; btn.style.background = ''; }, 3000);
-    } else {
-      btn.textContent = '✓ Message Sent!'; btn.style.background = '#27ae60';
-      setTimeout(() => { btn.textContent = 'Send Message'; btn.style.background = ''; btn.disabled = false; e.target.reset(); }, 3000);
-    }
-  }
 </script>
 
 <!-- ══ SOCIAL FLOAT ══ -->
